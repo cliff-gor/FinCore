@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Coverage gate (spec 001 NFR): >= 80 % line coverage on the shared kernel. -->
+    <TestingPlatformCommandLineArguments>--coverlet --coverlet-include [FinCore.SharedKernel]* --coverlet-threshold 80 --coverlet-threshold-type line --coverlet-threshold-stat Total --coverlet-file-prefix $(MSBuildProjectName) --coverlet-output-format cobertura</TestingPlatformCommandLineArguments>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\BuildingBlocks\FinCore.SharedKernel\FinCore.SharedKernel.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="coverlet.MTP" />
+  </ItemGroup>
+</Project>
