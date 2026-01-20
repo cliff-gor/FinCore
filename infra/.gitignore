@@ -1,0 +1,13 @@
+# Terraform local artefacts
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+# Bootstrap inputs may contain account details; keep the .example only
+bootstrap/terraform.tfvars
