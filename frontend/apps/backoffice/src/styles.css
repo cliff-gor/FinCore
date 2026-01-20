@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import '@fincore/config/tailwind/web.css';
+
+/* Shared web packages are outside this app's root, so Tailwind must be told to scan them. */
+@source '../../../packages/ui/src';
+@source '../../../packages/auth/src';

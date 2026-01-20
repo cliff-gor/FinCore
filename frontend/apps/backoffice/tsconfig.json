@@ -1,0 +1,4 @@
+{
+  "extends": "../../packages/config/tsconfig/vite-app.json",
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}
