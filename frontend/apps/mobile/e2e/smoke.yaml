@@ -1,0 +1,10 @@
+# Maestro smoke flow (M0): the home screen shows the Mobile Gateway /health status.
+# Run with: maestro test e2e/smoke.yaml  (requires a dev build on a simulator/emulator; not run in CI yet)
+appId: com.fincore.app
+---
+- launchApp:
+    clearState: true
+- assertVisible: 'Welcome to FinCore'
+- extendedWaitUntil:
+    visible: 'FinCore is online|FinCore is not reachable|Update required'
+    timeout: 15000
