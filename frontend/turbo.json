@@ -1,5 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
+  // Assistant rules live in the repo-root CLAUDE.md and AGENTS.md (spec §35.1); stop turbo writing its own AGENTS.md.
+  "agentGuidance": false,
   // Both change build or test output (VITE_APP_ENV is baked into the bundle, CI switches Playwright settings),
   // so they are part of every task's cache key.
   "globalEnv": ["VITE_APP_ENV", "CI"],
