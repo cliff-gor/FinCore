@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Rejects AI attribution lines in commit messages (spec §35.7.1).
+# Enable once per clone: git config core.hooksPath .githooks
+if grep -qiE '^(co-authored-by:.*(claude|anthropic|copilot|cursor|codex)|.*generated with (claude|ai))' "$1"; then
+  echo "Commit rejected: remove AI attribution lines from the commit message." >&2
+  exit 1
+fi

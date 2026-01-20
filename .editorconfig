@@ -1,0 +1,53 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{json,yml,yaml,ts,tsx,js,mjs,cjs,css,md,props,targets,csproj,slnx,xml,hcl,tf}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.cs]
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_prefer_primary_constructors = true:suggestion
+dotnet_sort_system_directives_first = true
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel
+dotnet_naming_rule.private_fields_underscore.severity = suggestion
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.underscore_camel.capitalization = camel_case
+dotnet_naming_style.underscore_camel.required_prefix = _
+
+# Analyzer tuning (latest-recommended + warnings as errors)
+# CA1515: module types are internal by design where possible; public types are the module contract surface.
+dotnet_diagnostic.CA1515.severity = none
+# CA1848/CA1873: LoggerMessage source generators are optional in M0; revisit for hot paths.
+dotnet_diagnostic.CA1848.severity = none
+dotnet_diagnostic.CA1873.severity = none
+# CA1711: "EventHandler"-style suffixes are part of our naming convention (XxxIntegrationEventHandler).
+dotnet_diagnostic.CA1711.severity = none
+# CA1716: FinCore is C#-only; 'Error' is the domain term for typed failures.
+dotnet_diagnostic.CA1716.severity = none
+
+[tests/**.cs]
+# Test method names use underscores for readability.
+dotnet_diagnostic.CA1707.severity = none
+# xUnit v3 manages ConfigureAwait.
+dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.CA1062.severity = none
+dotnet_diagnostic.CA1861.severity = none
+dotnet_diagnostic.CA2000.severity = none
+
+[**/Migrations/*.cs]
+generated_code = true
