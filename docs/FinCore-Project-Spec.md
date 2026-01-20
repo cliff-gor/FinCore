@@ -2830,6 +2830,41 @@ Everything below is created by Terraform from `infra/` through the pipeline; the
 - ADRs for every significant decision (`docs/adr/NNNN-title.md`).
 - `.editorconfig` enforced; analyzers at `latest-recommended`, warnings as errors.
 
+### 34.1 Code comments
+
+Comments are part of the code review, not an afterthought. They are written for the next engineer who has to change
+the code under pressure, and they read like a senior engineer explaining a decision to a colleague: short, specific,
+plain English.
+
+**What to comment**
+- **Why, not what.** The code already says what it does. Comments explain the reason: the business rule, the
+  constraint, the trade-off, or the failure the code protects against.
+  ✗ `// loop over the messages` ✓ `// Oldest first, so subscribers see events in the order they happened.`
+- **Business and money rules** at the point they are enforced, with the spec reference (`// Spec §17: penalty starts
+  only after PenaltyGraceDays.`). Rounding, allocation order, interest formulas and date rules always get a comment.
+- **Non-obvious technical decisions:** concurrency (`xmin`, locks, races), transactions and outbox ordering,
+  idempotency, retries, security checks (CSRF, open-redirect guards, fail-closed authorization), and anything that
+  would look like a bug or an optimisation opportunity to a newcomer ("This looks redundant, but …").
+- **Deliberate deviations and temporary stubs**, linked to the ADR or milestone that resolves them.
+
+**Where**
+- **C#:** XML doc comments (`/// <summary>`) on every public type and on public members whose purpose is not obvious
+  from the name — especially everything in `.Contracts`, `SharedKernel` and `BuildingBlocks`. Inside method bodies use
+  `//` line comments sparingly, above the line they explain.
+- **TypeScript:** TSDoc (`/** … */`) on exported functions, hooks, components and types in `packages/*`; `//` line
+  comments inside implementations for the same "why" cases.
+- **Config and infrastructure** (`*.json` where allowed, YAML, Terraform, Dockerfiles, MSBuild): a comment on every
+  non-default or surprising setting.
+
+**Style rules**
+- One idea per comment; full sentences; no shouting, emojis or jokes.
+- Reference the source of a rule: spec section (`spec §25`), ADR (`ADR-0003`), or milestone spec (`spec 001`).
+- `TODO` comments name the milestone or work package that resolves them: `// TODO(M1): load permissions from Identity.`
+  No anonymous TODOs and no `FIXME`/`HACK` left on `main`.
+- No commented-out code, no change logs or author names in comments (git history has that), and no comments that
+  restate a type signature.
+- Keep comments true: a change that makes a comment wrong must update or delete it in the same commit.
+
 ## 35. Development Strategy & Build Plan
 
 This section fixes **how** FinCore is built: the order of work, what must be finished before the next thing starts, and how AI coding assistants are used. The plan is **owner-led, not agent-driven**: the project owner assigns work packages in the order below, and an AI assistant only executes the package it was given, using the skills listed for that area.
@@ -2990,6 +3025,7 @@ A work package is done only when all of these hold:
 - [ ] UI: built from `packages/ui` / mobile UI kit and tokens only (no ad-hoc colors or spacing); light + dark checked; accessibility checks pass (axe on web, screen-reader labels on mobile).
 - [ ] OpenAPI and `packages/api-client` regenerated and committed if the contract changed.
 - [ ] Docs: ADR for any architectural decision; `docs/skills.md` updated if skills changed.
+- [ ] Comments follow §34.1: the *why* of business rules, money handling, concurrency and security is documented in the code; public/exported APIs have XML docs or TSDoc.
 - [ ] Commits follow §35.7 (owner identity, no AI attribution, readable messages); PR uses the template.
 - [ ] Merged to `main` and deployed to Staging automatically; smoke test green and `/api/version` shows the new commit.
 

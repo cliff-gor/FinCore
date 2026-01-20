@@ -27,6 +27,9 @@ FinCore is a modular-monolith financial platform (.NET 10 / C# 14, React 19, Exp
 - Business failures return `Result`; endpoints map them to RFC 9457 ProblemDetails with a stable `code`.
 - Handlers, validators and EF configurations are `internal sealed`. Architecture tests enforce boundaries.
 - Money-moving endpoints require `Idempotency-Key` (`RequireIdempotencyKey()`).
+- Comment like a senior engineer (spec §34.1): explain *why* — business/money rules with their spec reference,
+  concurrency, idempotency, security and deliberate deviations. XML docs (C#) / TSDoc (TS) on public and exported
+  APIs. No restating the code, no commented-out code, and `TODO(M<n>)` must name the milestone that resolves it.
 
 ## Skills per area (§35.2)
 - **Backend (C#/.NET):** use the skills the owner enabled; do not install or switch .NET skills yourself.
