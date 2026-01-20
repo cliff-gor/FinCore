@@ -51,15 +51,19 @@ export const Permissions = {
   },
 } as const;
 
+// Collapses the nested constant into a union of its string values, e.g. 'org.manage' | 'org.read' | ….
 type Leaves<T> = T extends string ? T : { [K in keyof T]: Leaves<T[K]> }[keyof T];
 
+/** Any single permission code defined in `Permissions`. */
 export type Permission = Leaves<typeof Permissions>;
 
 /** Wildcard grant used by the Auditor role: every `*.read` permission. */
 export const ReadAllWildcard = '*.read';
 
+/** What a user can hold: a concrete permission or the read-all wildcard. */
 export type PermissionGrant = Permission | typeof ReadAllWildcard;
 
+/** Every concrete permission as a flat list. */
 export const allPermissions: readonly Permission[] = Object.values(Permissions).flatMap(
   (group) => Object.values(group) as Permission[],
 );

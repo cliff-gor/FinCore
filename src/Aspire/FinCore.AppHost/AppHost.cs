@@ -4,6 +4,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 var postgres = builder.AddPostgres("postgres")
     .WithImageTag("17")
     .WithInitFiles("../../../deploy/postgres")
+    // Named volumes keep data between `dotnet run` sessions; remove them to start from an empty database.
     .WithDataVolume("fincore-postgres-data");
 var database = postgres.AddDatabase("fincore");
 
@@ -18,12 +19,14 @@ var api = builder.AddProject<Projects.FinCore_Api>("api", launchProfileName: "ht
     .WithReference(database)
     .WaitFor(database)
     .WithEnvironment("Seq__ServerUrl", seq.GetEndpoint("http"))
+    // The API only validates tokens, so it needs the realm URL but no client secret.
     .WithEnvironment("Auth__Authority", ReferenceExpression.Create($"{keycloak.GetEndpoint("http")}/realms/fincore"))
     .WaitFor(keycloak);
 
 // Gateway in its three modes: BackOffice BFF, Portal BFF, Mobile Gateway.
 IResourceBuilder<ProjectResource> Gateway(string name, string profile) =>
     builder.AddProject<Projects.FinCore_Bff>(name, launchProfileName: profile)
+        // Point YARP at whatever port Aspire assigned the API, instead of the fixed port in appsettings.json.
         .WithEnvironment("ReverseProxy__Clusters__api__Destinations__d1__Address", api.GetEndpoint("http"))
         .WithReference(api)
         .WaitFor(api);

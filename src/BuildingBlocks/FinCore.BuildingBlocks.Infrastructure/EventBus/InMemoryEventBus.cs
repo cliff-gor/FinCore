@@ -23,6 +23,8 @@ internal sealed class InMemoryEventBus(IServiceScopeFactory scopeFactory) : IEve
             static t => typeof(IIntegrationEventHandler<>).MakeGenericType(t));
         var handleMethod = handlerType.GetMethod(nameof(IIntegrationEventHandler<IIntegrationEvent>.Handle))!;
 
+        // Count subscribers once, then resolve each again in its own scope by index, so every subscriber gets a fresh
+        // DbContext and a failure in one cannot leave tracked changes behind for the next.
         int handlerCount;
         await using (var probe = scopeFactory.CreateAsyncScope())
         {

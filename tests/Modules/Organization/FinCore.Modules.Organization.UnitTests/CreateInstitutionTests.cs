@@ -8,6 +8,10 @@ using NSubstitute.ExceptionExtensions;
 
 namespace FinCore.Modules.Organization.UnitTests;
 
+/// <summary>
+/// The create-institution slice with its collaborators substituted: handler outcomes, including the duplicate-code
+/// race, and the validator's field-level errors (spec 001 AC-8, AC-9).
+/// </summary>
 public sealed class CreateInstitutionTests
 {
     private static readonly DateOnly Tuesday = new(2026, 10, 13);
@@ -15,6 +19,7 @@ public sealed class CreateInstitutionTests
     private readonly IOrganizationUnitOfWork _unitOfWork = Substitute.For<IOrganizationUnitOfWork>();
     private readonly ICurrencyCatalog _currencies = Substitute.For<ICurrencyCatalog>();
 
+    // Only KES and USD count as "active" here, so JPY exercises the unsupported-currency rule.
     public CreateInstitutionTests() =>
         _currencies.IsActiveAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(ci => ci.Arg<string>() is "KES" or "USD");

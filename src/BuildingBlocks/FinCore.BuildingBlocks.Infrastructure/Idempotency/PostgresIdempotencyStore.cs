@@ -46,6 +46,7 @@ internal sealed class PostgresIdempotencyStore(PlatformDbContext dbContext, Time
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
         {
+            // First writer wins. Both requests carried the same key, so both responses are equally valid.
             // A concurrent request with the same key stored its response first; keep that one.
             dbContext.ChangeTracker.Clear();
         }

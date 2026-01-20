@@ -1,8 +1,11 @@
 {
   "$schema": "https://turborepo.com/schema.json",
+  // Both change build or test output (VITE_APP_ENV is baked into the bundle, CI switches Playwright settings),
+  // so they are part of every task's cache key.
   "globalEnv": ["VITE_APP_ENV", "CI"],
   "tasks": {
     "build": {
+      // Dependencies build first: design-tokens generates the theme files that every app imports.
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**"]
     },
@@ -19,6 +22,7 @@
       "outputs": ["coverage/**"]
     },
     "e2e": {
+      // Runs against `vite preview` of this app's own production build.
       "dependsOn": ["build"],
       "cache": false
     }

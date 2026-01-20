@@ -7,6 +7,7 @@ using FinCore.SharedKernel.Results;
 
 namespace FinCore.Modules.Organization.Application.Institutions.CreateInstitution;
 
+/// <summary>Creates an institution and, through the outbox, publishes <c>InstitutionCreated</c> in the same transaction.</summary>
 internal sealed class CreateInstitutionCommandHandler(
     IInstitutionRepository institutions,
     IOrganizationUnitOfWork unitOfWork,
@@ -16,12 +17,15 @@ internal sealed class CreateInstitutionCommandHandler(
     {
         ArgumentNullException.ThrowIfNull(command);
 
+        // Cheap pre-check for the common case. It cannot stop a concurrent duplicate on its own;
+        // the unique index on org.institutions.code is the real guarantee (handled below).
         var normalizedCode = InstitutionCode.Normalize(command.Code);
         if (await institutions.CodeExistsAsync(normalizedCode, cancellationToken).ConfigureAwait(false))
         {
             return OrganizationErrors.InstitutionCodeTaken;
         }
 
+        // Wall-clock time stamps the domain event only; the business date comes from the request.
         var utcNow = timeProvider.GetUtcNow().UtcDateTime;
         var created = Institution.Create(
             command.Code,

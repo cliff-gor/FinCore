@@ -11,6 +11,7 @@ namespace FinCore.Api.DevSeeding;
 /// </summary>
 internal sealed class DevSeeder(IDispatcher dispatcher, ILogger<DevSeeder> logger)
 {
+    // A fixed date (a Tuesday) keeps dev data reproducible; it never follows the wall clock.
     private static readonly DateOnly SeedBusinessDate = new(2026, 10, 13);
 
     public async Task SeedAsync(CancellationToken cancellationToken)
@@ -23,6 +24,8 @@ internal sealed class DevSeeder(IDispatcher dispatcher, ILogger<DevSeeder> logge
 
         foreach (var command in institutions)
         {
+            // Seeding goes through the normal pipeline (validation, outbox event), so dev data looks exactly like
+            // data created through the API.
             var result = await dispatcher.Send(command, cancellationToken).ConfigureAwait(false);
             if (result.IsSuccess)
             {

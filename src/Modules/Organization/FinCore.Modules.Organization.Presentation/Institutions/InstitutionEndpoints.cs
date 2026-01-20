@@ -15,6 +15,10 @@ using Microsoft.AspNetCore.Routing;
 
 namespace FinCore.Modules.Organization.Presentation.Institutions;
 
+/// <summary>
+/// HTTP request body for creating an institution. Kept separate from the command so the wire format can change
+/// without touching application code.
+/// </summary>
 public sealed record CreateInstitutionRequest(
     string Code,
     string Name,
@@ -23,8 +27,10 @@ public sealed record CreateInstitutionRequest(
     string? LicenseNumber,
     DateOnly InitialBusinessDate);
 
+/// <summary>Minimal API endpoints for institutions (spec §12). Mapped under <c>/api/v1</c> by the module registry.</summary>
 public static class InstitutionEndpoints
 {
+    /// <summary>OpenAPI document name; the build exports it to <c>openapi/organization.json</c> for the front ends.</summary>
     public const string OpenApiGroup = "organization";
 
     public static IEndpointRouteBuilder MapInstitutionEndpoints(this IEndpointRouteBuilder app)
@@ -55,6 +61,7 @@ public static class InstitutionEndpoints
             .Produces<InstitutionResponse>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
+        // Any signed-in user may read a business date (spec §12): every screen shows it, so no specific permission.
         group.MapGet("/{id:guid}/business-date", GetBusinessDateAsync)
             .WithName("GetInstitutionBusinessDate")
             .WithSummary("Get an institution's current business date")
@@ -73,6 +80,7 @@ public static class InstitutionEndpoints
                 request.Code, request.Name, request.Type, request.BaseCurrency, request.LicenseNumber, request.InitialBusinessDate),
             ct).ConfigureAwait(false);
 
+        // Location points at the new resource, so clients can follow it instead of building URLs themselves.
         return result.IsSuccess
             ? TypedResults.Created($"{http.Request.PathBase}{http.Request.Path.Value?.TrimEnd('/')}/{result.Value.Id}", result.Value)
             : result.ToProblem();

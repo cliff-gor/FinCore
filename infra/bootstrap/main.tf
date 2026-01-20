@@ -38,6 +38,7 @@ locals {
 resource "aws_s3_bucket" "tfstate" {
   bucket = local.state_bucket_name
 
+  # Losing this bucket loses the state of every environment.
   lifecycle {
     prevent_destroy = true
   }
@@ -47,6 +48,7 @@ resource "aws_s3_bucket_ownership_controls" "tfstate" {
   bucket = aws_s3_bucket.tfstate.id
 
   rule {
+    # Disables ACLs; access is controlled by IAM and the bucket policy only.
     object_ownership = "BucketOwnerEnforced"
   }
 }
@@ -54,6 +56,7 @@ resource "aws_s3_bucket_ownership_controls" "tfstate" {
 resource "aws_s3_bucket_versioning" "tfstate" {
   bucket = aws_s3_bucket.tfstate.id
 
+  # Lets a corrupted or wrongly applied state be rolled back to an earlier version.
   versioning_configuration {
     status = "Enabled"
   }
@@ -86,6 +89,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "tfstate" {
     id     = "expire-old-state-versions"
     status = "Enabled"
 
+    # Empty filter = the whole bucket.
     filter {}
 
     noncurrent_version_expiration {
@@ -121,5 +125,6 @@ resource "aws_s3_bucket_policy" "tfstate" {
   bucket = aws_s3_bucket.tfstate.id
   policy = data.aws_iam_policy_document.tfstate_tls_only.json
 
+  # S3 can reject a bucket policy written while the public-access block is still being applied.
   depends_on = [aws_s3_bucket_public_access_block.tfstate]
 }

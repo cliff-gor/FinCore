@@ -6,6 +6,7 @@
     color-scheme: light;
   }
 
+  /* Native controls and scrollbars follow the app theme, not the OS setting. */
   html[data-theme='dark'] {
     color-scheme: dark;
   }

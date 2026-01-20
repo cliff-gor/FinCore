@@ -10,6 +10,7 @@ internal static class BffEndpoints
     {
         var bff = app.MapGroup("/bff");
 
+        // TODO(M1): return the signed-in user's claims, permissions, institution and business date from the session.
         bff.MapGet("/user", () => Results.Problem(
             statusCode: StatusCodes.Status401Unauthorized,
             title: "Not signed in",

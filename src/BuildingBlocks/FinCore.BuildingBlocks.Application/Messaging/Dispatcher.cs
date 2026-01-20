@@ -4,6 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace FinCore.BuildingBlocks.Application.Messaging;
 
+/// <summary>
+/// Resolves the handler and pipeline behaviors for a request from DI. A closed generic wrapper per request type is
+/// built once and cached, so the per-call cost is a dictionary lookup rather than reflection.
+/// </summary>
 internal sealed class Dispatcher(IServiceProvider serviceProvider) : IDispatcher
 {
     private static readonly ConcurrentDictionary<Type, object> Wrappers = new();

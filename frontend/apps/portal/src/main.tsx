@@ -6,6 +6,7 @@ import { createQueryClient } from './app/queryClient.ts';
 import { createAppRouter } from './app/router.tsx';
 import './styles.css';
 
+// Configure HTTP before anything can fetch, so the first /bff/user call already carries `X-CSRF: 1`.
 configureApi();
 const queryClient = createQueryClient();
 const router = createAppRouter(queryClient);

@@ -17,6 +17,7 @@ builder.Services
     .AddApplicationBuildingBlocks()
     .AddInfrastructureBuildingBlocks(builder.Configuration);
 
+// TODO(M1): list each new module here as it lands; the order in which modules migrate comes from their MigrationOrder.
 IModule[] modules = [new OrganizationModule()];
 foreach (var module in modules)
 {

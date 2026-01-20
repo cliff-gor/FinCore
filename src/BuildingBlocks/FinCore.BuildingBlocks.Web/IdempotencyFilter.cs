@@ -37,6 +37,7 @@ public sealed class IdempotencyFilter : IEndpointFilter
         var store = http.RequestServices.GetRequiredService<IIdempotencyStore>();
         var user = http.RequestServices.GetRequiredService<ICurrentUser>();
         var route = (http.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText ?? http.Request.Path.Value;
+        // Scope the key by endpoint and user: two customers who happen to pick the same key must not share responses.
         var scopedKey = $"{http.Request.Method} {route} {user.Id}:{key}";
         var requestHash = HashArguments(context, http);
         var ct = http.RequestAborted;
@@ -44,6 +45,8 @@ public sealed class IdempotencyFilter : IEndpointFilter
         var stored = await store.GetAsync(scopedKey, ct).ConfigureAwait(false);
         if (stored is not null)
         {
+            // Same key, different body means a client bug or a reused key. Replaying the old response would
+            // confirm a transfer the client never asked for, so refuse loudly (spec §25: 422).
             if (!string.Equals(stored.RequestHash, requestHash, StringComparison.Ordinal))
             {
                 return Results.Problem(
@@ -76,6 +79,7 @@ public sealed class IdempotencyFilter : IEndpointFilter
         }
 
         var body = buffer.ToArray();
+        // Server errors are not stored, so the client can retry with the same key once the fault is fixed.
         if (http.Response.StatusCode < 500)
         {
             await store.SaveAsync(scopedKey, new IdempotentResponse(requestHash, http.Response.StatusCode, http.Response.ContentType, body), ct)
@@ -86,6 +90,8 @@ public sealed class IdempotencyFilter : IEndpointFilter
         return Results.Empty;
     }
 
+    // Hashes the bound endpoint arguments rather than the raw body: model binding has already consumed the stream,
+    // and equivalent JSON with different whitespace or property order should count as the same request.
     private static string HashArguments(EndpointFilterInvocationContext context, HttpContext http)
     {
         var payload = context.Arguments

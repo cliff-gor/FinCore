@@ -70,9 +70,11 @@ public sealed class ModuleBoundaryTests
             .SelectMany(other => new[] { "Domain", "Application", "Infrastructure", "Presentation" }
                 .Select(layer => $"FinCore.Modules.{other}.{layer}"))
             .ToArray();
+        // With a single module there is nothing to cross-check yet; the rule starts biting when the second
+        // module lands in M1, without anyone having to remember to enable it.
         if (forbidden.Length == 0)
         {
-            return; // Only one module exists so far; the rule activates when the second module lands.
+            return;
         }
 
         foreach (var layer in ModuleAssemblies.Layers)

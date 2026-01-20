@@ -12,6 +12,8 @@ internal sealed class CorrelationIdMiddleware(RequestDelegate next)
     public async Task InvokeAsync(HttpContext context)
     {
         var incoming = context.Request.Headers[HeaderName].ToString();
+        // Accept the caller's id so a request can be followed across systems, but cap its length: the header is
+        // client-controlled and ends up in every log line.
         var correlationId = !string.IsNullOrWhiteSpace(incoming) && incoming.Length <= MaxLength
             ? incoming
             : Activity.Current?.TraceId.ToString() ?? context.TraceIdentifier;

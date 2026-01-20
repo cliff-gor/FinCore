@@ -1,5 +1,6 @@
 import { cn } from '../cn.ts';
 
+/** Build metadata shown by `AppFooter`, normally from the Vite-injected build info. */
 export interface AppFooterProps {
   version: string;
   sha: string;

@@ -5,6 +5,7 @@ export const fontFamilies = {
   serif: ['"Instrument Serif"', 'ui-serif', 'Georgia', 'serif'],
 } as const;
 
+/** One step of the type scale. */
 export interface TypeStyle {
   family: keyof typeof fontFamilies;
   weight: number;
@@ -12,6 +13,8 @@ export interface TypeStyle {
   lineHeight: number;
 }
 
+// TODO(M1): add the mobile display size from spec §32.3 (40/48) with the mobile UI kit.
+/** Named text styles. Sizes are the web values from spec §32.3. */
 export const typeScale = {
   'display-number': { family: 'display', weight: 300, size: 48, lineHeight: 56 },
   'display-headline': { family: 'display', weight: 600, size: 40, lineHeight: 48 },

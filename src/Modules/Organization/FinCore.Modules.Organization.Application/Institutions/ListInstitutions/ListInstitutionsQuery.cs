@@ -9,6 +9,7 @@ namespace FinCore.Modules.Organization.Application.Institutions.ListInstitutions
 /// <summary>Paged list ordered by code (addition to master spec §12, approved in spec 001).</summary>
 public sealed record ListInstitutionsQuery(int Page = 1, int PageSize = Paging.DefaultPageSize) : IQuery<PagedResult<InstitutionResponse>>;
 
+/// <summary>Bounds paging so no client can ask for an unbounded page (spec §28: max 100).</summary>
 internal sealed class ListInstitutionsQueryValidator : AbstractValidator<ListInstitutionsQuery>
 {
     public ListInstitutionsQueryValidator()

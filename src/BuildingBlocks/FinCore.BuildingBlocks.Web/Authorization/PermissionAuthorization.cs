@@ -40,6 +40,8 @@ public sealed class PermissionPolicyProvider(IOptions<AuthorizationOptions> opti
     {
         ArgumentNullException.ThrowIfNull(policyName);
 
+        // Build permission policies on demand instead of registering one per permission at start-up; the permission
+        // list grows with every module and would otherwise need to be kept in sync by hand.
         if (policyName.StartsWith(Prefix, StringComparison.Ordinal))
         {
             return new AuthorizationPolicyBuilder()

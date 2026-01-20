@@ -4,6 +4,10 @@ using FinCore.IntegrationTests.Shared;
 
 namespace FinCore.Modules.Organization.IntegrationTests;
 
+/// <summary>
+/// Paging and ordering (spec 001 AC-10). Uses its own database with seeding off, so the total count is exactly the
+/// three institutions created here.
+/// </summary>
 [Trait("Category", "Integration")]
 public sealed class InstitutionListTests(PostgresFixture postgres) : IAsyncLifetime
 {

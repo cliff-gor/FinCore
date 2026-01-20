@@ -21,6 +21,7 @@ public static class ResultExtensions
     {
         ArgumentNullException.ThrowIfNull(error);
 
+        // `code` is the stable, machine-readable identifier clients translate; `title` and `detail` are for humans.
         var extensions = new Dictionary<string, object?> { ["code"] = error.Code };
 
         if (error is ValidationError validation)
@@ -37,6 +38,7 @@ public static class ResultExtensions
             ErrorType.NotFound => (StatusCodes.Status404NotFound, "Not found"),
             ErrorType.Conflict => (StatusCodes.Status409Conflict, "Conflict"),
             ErrorType.Forbidden => (StatusCodes.Status403Forbidden, "Forbidden"),
+            // 422: the request is well-formed but the business state does not allow it (e.g. insufficient funds).
             ErrorType.BusinessRule => (StatusCodes.Status422UnprocessableEntity, "Business rule violated"),
             ErrorType.Validation => (StatusCodes.Status400BadRequest, "Validation failed"),
             _ => (StatusCodes.Status400BadRequest, "Request failed"),

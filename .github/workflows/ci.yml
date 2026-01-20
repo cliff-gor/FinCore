@@ -2,7 +2,7 @@
 #
 # Path-filtered jobs: backend, web, mobile, infra. The commit-message check always runs on PRs.
 # Actions are pinned to major versions for now.
-# TODO: pin every action to a full commit SHA once the pipeline works (§33.8.4 note); Dependabot
+# TODO(aws-spec): pin every action to a full commit SHA once the pipeline works (§33.8.4 note); Dependabot
 # (.github/dependabot.yml) then proposes the updates.
 name: ci
 
@@ -13,6 +13,7 @@ on:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # A new push to a PR supersedes the old run; runs on main always finish so every main commit has a result.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
@@ -21,6 +22,7 @@ permissions:
 env:
   DOTNET_NOLOGO: "true"
   DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  # CI runs the current LTS; frontend/package.json only requires >= 22.18 (native TypeScript type stripping).
   NODE_VERSION: "24"
   TERRAFORM_VERSION: "1.16.5"
   TFLINT_VERSION: "v0.64.0"
@@ -42,6 +44,8 @@ jobs:
       - id: filter
         uses: dorny/paths-filter@v4
         with:
+          # Every filter includes this workflow file, so a CI change re-runs all jobs. `frontend/*` covers the
+          # workspace-root config (package.json, lockfile, tsconfig.base.json, turbo.json).
           filters: |
             backend:
               - 'src/**'
@@ -85,6 +89,7 @@ jobs:
         run: dotnet restore FinCore.slnx
 
       - name: Build (warnings as errors)
+        # SourceRevisionId stamps the commit into the assembly version that /api/version reports (spec §33.7.3).
         run: dotnet build FinCore.slnx -c Release --no-restore -warnaserror -p:SourceRevisionId=${{ github.sha }}
 
       # Unit, architecture and integration tests (Testcontainers uses the runner's Docker).
@@ -92,6 +97,7 @@ jobs:
       - name: Test
         run: dotnet test --solution FinCore.slnx -c Release --no-build
 
+      # `dotnet list --vulnerable` exits 0 even when it finds something, so the output is grepped instead.
       - name: Vulnerable package check
         run: |
           dotnet list FinCore.slnx package --vulnerable --include-transitive 2>&1 | tee vulnerable.txt
@@ -148,6 +154,7 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # Browsers install into a machine-wide cache, so installing through one app serves both.
       - name: Install Playwright (chromium)
         run: pnpm --filter @fincore/backoffice exec playwright install --with-deps chromium
 
@@ -208,6 +215,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
+          # The wrapper rewrites stdout and exit codes; the scripted steps below need the raw CLI.
           terraform_wrapper: false
 
       - name: terraform fmt
@@ -217,6 +225,7 @@ jobs:
         run: |
           for dir in bootstrap envs/staging envs/production; do
             echo "::group::validate ${dir}"
+            # -backend=false: validate without AWS credentials or access to remote state.
             terraform -chdir="${dir}" init -backend=false -input=false
             terraform -chdir="${dir}" validate
             echo "::endgroup::"
@@ -243,6 +252,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          # Full history, so every commit between the PR base and head can be checked.
           fetch-depth: 0
 
       - name: Conventional Commits + no AI attribution (§35.7)
@@ -261,6 +271,7 @@ jobs:
               echo "::error::${sha:0:7}: header is not a Conventional Commit: '${header}'"
               failed=1
             fi
+            # Same hook developers run locally, so CI and local checks can't disagree (§35.7.1).
             if ! bash .githooks/commit-msg "${msg_file}"; then
               echo "::error::${sha:0:7}: contains AI attribution"
               failed=1

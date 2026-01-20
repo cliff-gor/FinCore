@@ -7,11 +7,13 @@ import Constants from 'expo-constants';
  */
 export const DEFAULT_API_URL = 'https://localhost:7202';
 
+/** Gateway base URL; EXPO_PUBLIC_ variables are inlined into the bundle at build time. */
 export function getApiUrl(): string {
   const fromEnv = process.env.EXPO_PUBLIC_API_URL;
   return fromEnv !== undefined && fromEnv.length > 0 ? fromEnv : DEFAULT_API_URL;
 }
 
+/** Store version and native build number of the running binary. */
 export interface AppVersionInfo {
   version: string;
   build: string;
@@ -30,7 +32,8 @@ export function appVersionHeader({ version, build }: AppVersionInfo): string {
   return `mobile/${version} (${build})`;
 }
 
-/** Bearer mode: no cookies or CSRF. The access token getter is wired in M1 (expo-auth-session). */
+/** Bearer mode through the Mobile Gateway: no cookies or CSRF (spec §31.4). */
+// TODO(M1): pass the in-memory access-token getter from expo-auth-session sign-in.
 export function configureApi(getAccessToken: () => string | null = () => null): void {
   const info = getAppVersionInfo();
   configureHttp({
@@ -39,6 +42,8 @@ export function configureApi(getAccessToken: () => string | null = () => null): 
       const token = getAccessToken();
       return token === null ? undefined : `Bearer ${token}`;
     },
+    // X-Client-Version is the cross-client header; X-App-Version adds the build number for the gateway's
+    // minimum-version check (spec §31.7).
     clientVersion: `mobile/${info.version}`,
     headers: { 'X-App-Version': appVersionHeader(info) },
   });

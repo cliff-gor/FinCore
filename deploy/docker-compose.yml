@@ -35,13 +35,14 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.8
     container_name: fincore-keycloak
+    # Dev mode (plain HTTP, no production checks); the realm file is imported only when the realm is missing.
     command: ["start-dev", "--import-realm"]
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin_dev_only # DEV-ONLY master-realm admin password
       KC_HEALTH_ENABLED: "true"
       KC_HTTP_PORT: "8080"
-      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT: "false" # dev only: accept whichever hostname the BFF or browser uses
     ports:
       - "8080:8080" # OIDC + admin console
       - "9000:9000" # management (health, metrics)

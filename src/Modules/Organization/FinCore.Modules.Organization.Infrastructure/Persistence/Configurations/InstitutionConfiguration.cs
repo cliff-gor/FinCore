@@ -16,9 +16,12 @@ internal sealed class InstitutionConfiguration : IEntityTypeConfiguration<Instit
         builder.Property(i => i.Code)
             .HasConversion(c => c.Value, v => InstitutionCode.FromStorage(v))
             .HasMaxLength(InstitutionCode.MaxLength);
+        // The unique index is what really prevents duplicate codes under concurrency; the handler's pre-check is
+        // only a fast path (spec 001 edge cases).
         builder.HasIndex(i => i.Code).IsUnique();
 
         builder.Property(i => i.Name).HasMaxLength(Institution.NameMaxLength);
+        // Enums are stored as strings so the data stays readable in SQL and survives reordering of enum members.
         builder.Property(i => i.Type).HasConversion<string>().HasMaxLength(20);
         builder.Property(i => i.Status).HasConversion<string>().HasMaxLength(20);
         builder.Property(i => i.BaseCurrency).HasMaxLength(3).IsFixedLength();

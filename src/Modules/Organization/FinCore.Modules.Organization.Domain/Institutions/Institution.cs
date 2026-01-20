@@ -30,6 +30,7 @@ public sealed class Institution : AggregateRoot<InstitutionId>
         Status = InstitutionStatus.Active;
     }
 
+    /// <summary>EF Core materialization only; real instances come from <see cref="Create"/>.</summary>
     private Institution()
     {
         Code = null!;
@@ -37,6 +38,7 @@ public sealed class Institution : AggregateRoot<InstitutionId>
         BaseCurrency = null!;
     }
 
+    /// <summary>Immutable after creation: customer and account numbers embed it from M2 onward (spec §14, §15).</summary>
     public InstitutionCode Code { get; private set; }
 
     public string Name { get; private set; }
@@ -50,8 +52,18 @@ public sealed class Institution : AggregateRoot<InstitutionId>
 
     public InstitutionStatus Status { get; private set; }
 
+    /// <summary>
+    /// The institution's accounting date. Only End of Day moves it forward, one working day at a time (spec §12, §26),
+    /// so it is deliberately not settable from outside the aggregate.
+    /// </summary>
     public DateOnly CurrentBusinessDate { get; private set; }
 
+    /// <summary>
+    /// Validates and creates an institution in <see cref="InstitutionStatus.Active"/> status (spec 001).
+    /// The application layer runs the same checks first for friendlier field errors; these are the invariants
+    /// that hold no matter who calls the aggregate.
+    /// </summary>
+    /// <param name="utcNow">Wall-clock time for the event timestamp only — never used for financial dates.</param>
     public static Result<Institution> Create(
         string? code,
         string? name,
@@ -78,6 +90,7 @@ public sealed class Institution : AggregateRoot<InstitutionId>
             return OrganizationErrors.InvalidInstitutionType;
         }
 
+        // Blank and whitespace-only license numbers mean "not provided"; store null rather than an empty string.
         var license = string.IsNullOrWhiteSpace(licenseNumber) ? null : licenseNumber.Trim();
         if (license is { Length: > LicenseNumberMaxLength })
         {
@@ -92,6 +105,8 @@ public sealed class Institution : AggregateRoot<InstitutionId>
         var institution = new Institution(
             InstitutionId.New(), codeResult.Value, trimmedName, type, baseCurrency, license, initialBusinessDate);
 
+        // The event carries everything subscribers need (Ledger seeds a chart of accounts from it in M3),
+        // so nobody has to call back into Organization to fetch details (spec §10).
         institution.Raise(new InstitutionCreatedDomainEvent(
             Guid.CreateVersion7(),
             utcNow,

@@ -24,7 +24,7 @@ public sealed class DevSeedTests(PostgresFixture postgres)
             await AssertSeededAsync(first, client);
         }
 
-        // Restart against the same database: no duplicates.
+        // Restart against the same database: the seeder must skip existing codes rather than fail or duplicate.
         await using var second = new FinCoreApiFactory(postgres, settings: settings);
         using var secondClient = second.CreateClient();
         await AssertSeededAsync(second, secondClient);

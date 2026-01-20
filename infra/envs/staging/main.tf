@@ -144,6 +144,9 @@ module "site_portal" {
 }
 
 # 8–10. Services ---------------------------------------------------------------------
+# Tasks run in public subnets with public IPs instead of behind a NAT gateway, which would cost more than
+# the whole compute layer; their security groups still only admit the ALB and the gateway (spec §33.3).
+# `initial_image_tag` is used for the first deploy only; CD registers new task definitions afterwards.
 module "api" {
   source = "../../modules/ecs-service"
 
@@ -165,6 +168,7 @@ module "api" {
   tags = local.tags
 }
 
+# The gateway is a Service Connect client only: it calls the API, nothing calls it internally.
 module "gateway" {
   source = "../../modules/ecs-service"
 
@@ -187,6 +191,7 @@ module "gateway" {
   tags = local.tags
 }
 
+# Task definition only, run as a one-off task by the deploy workflow before the services roll (spec §33.10).
 module "migrator" {
   source = "../../modules/ecs-service"
 

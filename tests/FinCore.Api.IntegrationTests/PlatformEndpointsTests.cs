@@ -5,6 +5,7 @@ using FinCore.IntegrationTests.Shared;
 
 namespace FinCore.Api.IntegrationTests;
 
+/// <summary>Platform endpoints and headers every client relies on (spec 001 AC-18, AC-20).</summary>
 [Trait("Category", "Integration")]
 public sealed class PlatformEndpointsTests(PostgresFixture postgres)
 {

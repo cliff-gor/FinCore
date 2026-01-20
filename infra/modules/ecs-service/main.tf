@@ -183,6 +183,7 @@ resource "aws_ecs_service" "this" {
     assign_public_ip = var.assign_public_ip
   }
 
+  # Start the new task before stopping the old one, so a one-task service never drops to zero during a deploy.
   deployment_minimum_healthy_percent = 100
   deployment_maximum_percent         = 200
 
@@ -225,6 +226,7 @@ resource "aws_ecs_service" "this" {
     }
   }
 
+  # The pipeline, autoscaling and the scheduler own these after creation (see the header).
   lifecycle {
     ignore_changes = [task_definition, desired_count]
   }
@@ -256,6 +258,7 @@ resource "aws_appautoscaling_policy" "cpu" {
   resource_id        = aws_appautoscaling_target.this[0].resource_id
 
   target_tracking_scaling_policy_configuration {
+    # Scale out quickly under load, scale in slowly to avoid flapping.
     target_value       = var.autoscaling.cpu_target_percent
     scale_in_cooldown  = 300
     scale_out_cooldown = 60

@@ -8,9 +8,11 @@ import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { I18nextProvider } from 'react-i18next';
 
+// Module scope: runs once per JS bundle load, before any screen can fetch.
 configureApi();
 
 export default function RootLayout() {
+  // Lazy initial state keeps one client for the app's lifetime across re-renders and fast refresh.
   const [queryClient] = useState(createQueryClient);
   return (
     <QueryClientProvider client={queryClient}>

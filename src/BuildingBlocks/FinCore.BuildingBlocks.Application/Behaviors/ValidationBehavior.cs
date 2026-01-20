@@ -20,12 +20,14 @@ internal sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValid
             return await next().ConfigureAwait(false);
         }
 
+        // Run every validator and report every failure at once, so forms can show all field errors together.
         var context = new ValidationContext<TRequest>(request);
         var results = await Task.WhenAll(validatorList.Select(v => v.ValidateAsync(context, cancellationToken))).ConfigureAwait(false);
 
         var errors = results
             .SelectMany(r => r.Errors)
             .Where(f => f is not null)
+            // Command properties are PascalCase but JSON clients send camelCase; use the client's field names.
             .GroupBy(f => ToCamelCase(f.PropertyName), StringComparer.Ordinal)
             .ToDictionary(g => g.Key, g => g.Select(f => f.ErrorMessage).Distinct(StringComparer.Ordinal).ToArray(), StringComparer.Ordinal);
 

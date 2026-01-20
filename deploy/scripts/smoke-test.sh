@@ -46,6 +46,7 @@ if [[ -n "${EXPECTED_COMMIT}" ]]; then
   else
     commit="$(sed -n 's/.*"commit"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' <<<"${version_json}")"
   fi
+  # Either side may be a short SHA, so a prefix match in either direction counts.
   if [[ -z "${commit}" || ( "${EXPECTED_COMMIT}" != "${commit}"* && "${commit}" != "${EXPECTED_COMMIT}"* ) ]]; then
     echo "FAIL: deployed commit '${commit}' does not match expected '${EXPECTED_COMMIT}'" >&2
     exit 1

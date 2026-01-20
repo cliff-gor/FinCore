@@ -5,6 +5,7 @@ using FinCore.SharedKernel.Results;
 
 namespace FinCore.Modules.Organization.UnitTests;
 
+/// <summary>Domain invariants of the Institution aggregate, independent of the database and HTTP (spec 001 AC-7, AC-9).</summary>
 public sealed class InstitutionTests
 {
     private static readonly DateOnly Tuesday = new(2026, 10, 13);

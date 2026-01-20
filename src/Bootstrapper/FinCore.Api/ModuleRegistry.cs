@@ -10,6 +10,8 @@ internal static class ModuleRegistry
 
     public static IServiceCollection AddModules(this IServiceCollection services, IConfiguration configuration, params Assembly[] assemblies)
     {
+        // Modules are discovered by reflection, so adding a module means adding one assembly to Program.cs and
+        // nothing else in the host.
         var modules = assemblies
             .SelectMany(a => a.GetTypes())
             .Where(t => typeof(IModule).IsAssignableFrom(t) && t is { IsAbstract: false, IsInterface: false })

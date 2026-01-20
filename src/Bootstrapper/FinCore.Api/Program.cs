@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Scalar.AspNetCore;
 using Serilog;
 
+// FinCore.Api — the single host and composition root of the modular monolith (spec §6, §8).
+// It wires cross-cutting concerns and registers modules; it contains no business logic of its own.
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
@@ -32,9 +34,12 @@ builder.Services.AddSerilog(
             logger.WriteTo.Seq(seqUrl, formatProvider: CultureInfo.InvariantCulture);
         }
     },
+    // Keep other logging providers (OpenTelemetry) receiving logs too, so the Aspire dashboard still shows them.
     writeToProviders: true);
 
+// Enums travel as strings on the wire (spec §28): "Bank" is self-describing, 1 is not.
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+// Every error response carries a traceId, so a support ticket can be matched to logs and traces.
 builder.Services.AddProblemDetails(o => o.CustomizeProblemDetails = ctx =>
     ctx.ProblemDetails.Extensions.TryAdd("traceId", Activity.Current?.Id ?? ctx.HttpContext.TraceIdentifier));
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -61,6 +66,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         o.Authority = builder.Configuration["Auth:Authority"];
         o.Audience = builder.Configuration["Auth:Audience"];
         o.RequireHttpsMetadata = builder.Configuration.GetValue("Auth:RequireHttpsMetadata", true);
+        // Keep JWT claim names as issued ("sub", "permission"); the legacy mapping renames them to long SOAP URIs.
         o.MapInboundClaims = false;
     });
 builder.Services.AddAuthorization();
@@ -74,6 +80,8 @@ builder.Services.AddOpenApi("organization", o => o.AddDocumentTransformer((docum
 
 var app = builder.Build();
 
+// Middleware order matters: exceptions are caught first, correlation and version headers are set before any
+// response starts, and authentication must run before authorization.
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseMiddleware<CorrelationIdMiddleware>();
@@ -82,6 +90,7 @@ app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// API docs are served only in Development; other environments use the committed snapshot in /openapi.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi("/openapi/{documentName}.json");

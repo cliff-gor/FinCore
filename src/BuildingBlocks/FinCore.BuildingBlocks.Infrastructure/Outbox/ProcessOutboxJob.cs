@@ -12,6 +12,8 @@ using Quartz;
 namespace FinCore.BuildingBlocks.Infrastructure.Outbox;
 
 /// <summary>Publishes a module's pending outbox messages to the event bus, with retry and dead-lettering.</summary>
+// DisallowConcurrentExecution: a slow batch must finish before the next trigger fires, otherwise two runs could
+// publish the same message. The clustered Quartz Postgres store (spec §33.5) extends this across API instances.
 [DisallowConcurrentExecution]
 public sealed class ProcessOutboxJob<TDbContext>(
     TDbContext dbContext,
@@ -35,6 +37,7 @@ public sealed class ProcessOutboxJob<TDbContext>(
         var messages = await dbContext.OutboxMessages
             .Where(m => m.ProcessedOnUtc == null && m.DeadLetteredOnUtc == null
                         && (m.NextAttemptOnUtc == null || m.NextAttemptOnUtc <= now))
+            // Oldest first, so subscribers see a module's events in the order they happened.
             .OrderBy(m => m.OccurredOnUtc)
             .Take(settings.BatchSize)
             .ToListAsync(ct)
@@ -45,6 +48,8 @@ public sealed class ProcessOutboxJob<TDbContext>(
             await ProcessAsync(message, settings, ct).ConfigureAwait(false);
         }
 
+        // One save per batch records both successes and failure bookkeeping. If the process dies before this, the
+        // batch is re-published; subscribers' inbox records make that harmless.
         if (messages.Count > 0)
         {
             await dbContext.SaveChangesAsync(ct).ConfigureAwait(false);
@@ -64,6 +69,8 @@ public sealed class ProcessOutboxJob<TDbContext>(
 
         try
         {
+            // The stored type name lets us deserialize without a central event registry. Renaming an integration event
+            // therefore needs a versioned name (spec §10), never a silent rename.
             var type = System.Type.GetType(message.Type, throwOnError: true)!;
             var integrationEvent = (IIntegrationEvent)JsonSerializer.Deserialize(message.Content, type, OutboxSerializer.Options)!;
 
@@ -80,6 +87,8 @@ public sealed class ProcessOutboxJob<TDbContext>(
             message.Error = ex.ToString();
             var now = timeProvider.GetUtcNow().UtcDateTime;
 
+            // Park the message after MaxAttempts rather than retrying forever, so one poison message cannot block
+            // monitoring or hide newer failures (spec 001: 5 attempts).
             if (message.Attempts >= settings.MaxAttempts)
             {
                 message.DeadLetteredOnUtc = now;

@@ -8,15 +8,22 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
+    // Workspace packages ship TypeScript source with `.ts` import specifiers and no build step; Vite, Metro and
+    // Node's type stripping all resolve them directly, so tsc only type-checks (noEmit).
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "strict": true,
+    // Index access may be undefined; catches unchecked lookups such as `minorUnits[code]`.
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
+    // Kept off so optional properties accept an explicit `undefined`, which the HTTP wrapper and generated
+    // clients pass routinely.
     "exactOptionalPropertyTypes": false,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
+    // No ambient @types by default: each package opts in (`node`, `vite/client`) so browser code can't use Node
+    // globals by accident.
     "types": []
   }
 }

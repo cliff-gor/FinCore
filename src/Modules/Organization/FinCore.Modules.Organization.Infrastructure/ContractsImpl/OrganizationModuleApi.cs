@@ -5,6 +5,10 @@ using FinCore.SharedKernel.Time;
 
 namespace FinCore.Modules.Organization.Infrastructure.ContractsImpl;
 
+/// <summary>
+/// In-process implementation of the module's public API. If Organization is ever extracted (spec §36), other modules
+/// keep the same interface and get an HTTP client behind it instead.
+/// </summary>
 internal sealed class OrganizationModuleApi(IOrganizationQueries queries) : IOrganizationModuleApi, IBusinessDateProvider
 {
     public async Task<InstitutionSummaryDto?> GetInstitutionAsync(Guid institutionId, CancellationToken cancellationToken)

@@ -22,6 +22,7 @@ internal sealed class IdempotentEventHandlerDecorator<TEvent, TDbContext>(
     {
         ArgumentNullException.ThrowIfNull(integrationEvent);
 
+        // Fast path for redeliveries: skip without opening a transaction.
         var alreadyHandled = await dbContext.InboxMessages
             .AnyAsync(m => m.MessageId == integrationEvent.Id && m.HandlerName == _handlerName, cancellationToken)
             .ConfigureAwait(false);
@@ -30,6 +31,8 @@ internal sealed class IdempotentEventHandlerDecorator<TEvent, TDbContext>(
             return;
         }
 
+        // The handler's own writes and the inbox row commit together: either both happen or neither does. A concurrent
+        // duplicate fails on the inbox primary key and is retried by the outbox, by which time the row exists.
         await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
         await inner.Handle(integrationEvent, cancellationToken).ConfigureAwait(false);

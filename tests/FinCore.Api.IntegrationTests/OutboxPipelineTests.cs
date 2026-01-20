@@ -9,6 +9,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace FinCore.Api.IntegrationTests;
 
+/// <summary>
+/// The full event pipeline: outbox row in the same transaction, publish, inbox de-duplication and dead-lettering
+/// (spec 001 AC-14 to AC-16). Outbox polling and retry delays are shortened by the test factory.
+/// </summary>
 [Trait("Category", "Integration")]
 public sealed class OutboxPipelineTests(PostgresFixture postgres)
 {
@@ -52,6 +56,7 @@ public sealed class OutboxPipelineTests(PostgresFixture postgres)
         var evt = new InstitutionCreatedIntegrationEvent(
             Guid.CreateVersion7(), DateTime.UtcNow, Guid.CreateVersion7(), "DUPE", "Dupe", "Bank", "KES", new DateOnly(2026, 10, 14));
 
+        // Simulates the outbox re-publishing after a crash between publish and marking the message processed.
         await bus.PublishAsync(evt, TestContext.Current.CancellationToken);
         await bus.PublishAsync(evt, TestContext.Current.CancellationToken);
 
@@ -86,6 +91,7 @@ public sealed class OutboxPipelineTests(PostgresFixture postgres)
 
     internal sealed class CountingHandler : IIntegrationEventHandler<InstitutionCreatedIntegrationEvent>
     {
+        // Static because each delivery resolves a fresh handler instance; keyed by event id so tests don't interfere.
         public static readonly ConcurrentDictionary<Guid, int> Calls = new();
 
         public Task Handle(InstitutionCreatedIntegrationEvent integrationEvent, CancellationToken cancellationToken)

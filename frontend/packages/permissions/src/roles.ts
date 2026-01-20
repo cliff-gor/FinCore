@@ -12,8 +12,10 @@ export const Roles = {
   Auditor: 'Auditor',
 } as const;
 
+/** One of the standard staff role names. */
 export type Role = (typeof Roles)[keyof typeof Roles];
 
+/** Typical grants per role (§13). The API decides real grants; this copy is for UI hints and tests only. */
 export const rolePermissions: Readonly<Record<Role, readonly PermissionGrant[]>> = {
   SystemAdmin: [Permissions.Org.Manage, Permissions.Identity.Manage, Permissions.Products.Manage],
   BranchOfficer: [

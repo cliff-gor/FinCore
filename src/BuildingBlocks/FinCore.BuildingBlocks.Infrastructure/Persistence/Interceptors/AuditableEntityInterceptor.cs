@@ -15,6 +15,7 @@ public sealed class AuditableEntityInterceptor(ICurrentUser currentUser, TimePro
 
         if (eventData.Context is not null)
         {
+            // One timestamp per SaveChanges, so all rows written together share the same audit time.
             var now = timeProvider.GetUtcNow().UtcDateTime;
             foreach (var entry in eventData.Context.ChangeTracker.Entries<IAuditable>())
             {

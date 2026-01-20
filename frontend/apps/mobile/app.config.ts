@@ -13,6 +13,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   version: pkg.version,
   orientation: 'portrait',
   userInterfaceStyle: 'automatic',
+  // EAS Update only sends a JS bundle to binaries with the same store version; native changes need a store
+  // release with a new version (spec §31.7).
   runtimeVersion: { policy: 'appVersion' },
   ios: {
     bundleIdentifier: 'com.fincore.app',
@@ -26,6 +28,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: ['expo-router', 'expo-localization'],
   experiments: {
+    // Type-checks `href` strings against the files in app/.
     typedRoutes: true,
   },
 });

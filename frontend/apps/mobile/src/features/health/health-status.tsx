@@ -29,6 +29,7 @@ export function HealthStatus() {
           <Text className="text-body text-text">{t('health.checking')}</Text>
         </View>
       )}
+      {/* A filled or hollow dot as well as colour, so status is never colour-only (spec §32.2). */}
       {state === 'healthy' && (
         <Text className="text-h3 text-positive">{`● ${t('health.healthy')}`}</Text>
       )}
@@ -37,6 +38,7 @@ export function HealthStatus() {
           <Text className="text-h3 text-negative">{`○ ${t('health.unhealthy')}`}</Text>
           <Pressable
             accessibilityRole="button"
+            // h-11 = 44 pt, the minimum touch target (spec §31.7).
             className="h-11 items-center justify-center self-start rounded-pill bg-primary px-5"
             onPress={() => void query.refetch()}
           >

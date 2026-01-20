@@ -2,9 +2,9 @@
 #
 # DISABLED until AWS is set up (spec 001: no AWS in M0). Runs on manual dispatch only, and the
 # reusable _*.yml workflows it calls are stubs that only echo "not configured".
-# TODO(aws-spec): enable the push trigger below and implement the reusable workflows.
+# TODO(aws-spec): add a `push` trigger on `main` and implement the reusable workflows.
 #
-# TODO: pin actions to a full commit SHA once the pipeline works (§33.8.4 note).
+# TODO(aws-spec): pin actions to a full commit SHA once the pipeline works (§33.8.4 note).
 name: cd-staging
 
 on:
@@ -14,14 +14,14 @@ on:
         description: "Deploy every component regardless of detected changes"
         type: boolean
         default: true
-  # push:
-  #   branches: [main]
 
+# One Staging deploy at a time; a newer run queues rather than cancelling one that is halfway through.
 concurrency:
   group: deploy-staging
   cancel-in-progress: false
 
 permissions:
+  # GitHub OIDC token to assume the deploy role from infra/bootstrap/github-oidc.tf; no stored AWS keys.
   id-token: write
   contents: read
 
@@ -55,6 +55,7 @@ jobs:
 
   backend-build:
     needs: [changes, infra]
+    # always() so a skipped infra job (no infra changes) doesn't skip this one; only an infra failure blocks it.
     if: always() && needs.changes.outputs.backend == 'true' && needs.infra.result != 'failure'
     uses: ./.github/workflows/_build-backend.yml
     with: { environment: staging }
@@ -85,6 +86,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.mobile == 'true'
     uses: ./.github/workflows/_mobile-update.yml
+    # Staging builds listen on the EAS `preview` channel (frontend/apps/mobile/eas.json).
     with: { channel: preview }
     secrets: inherit
 

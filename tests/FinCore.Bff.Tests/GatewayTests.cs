@@ -4,6 +4,10 @@ using System.Text.Json;
 
 namespace FinCore.Bff.Tests;
 
+/// <summary>
+/// Gateway behaviour in each mode against a real HTTP stand-in for the API, so YARP proxying is exercised end to end
+/// (spec 001 AC-21, AC-22).
+/// </summary>
 public sealed class GatewayTests(FakeApi api) : IClassFixture<FakeApi>
 {
     [Theory] // AC-21

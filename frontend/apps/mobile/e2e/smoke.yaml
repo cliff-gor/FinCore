@@ -7,4 +7,5 @@ appId: com.fincore.app
 - assertVisible: 'Welcome to FinCore'
 - extendedWaitUntil:
     visible: 'FinCore is online|FinCore is not reachable|Update required'
+    # Any of the three outcomes passes: the flow checks the app renders a result, not that the gateway is up.
     timeout: 15000

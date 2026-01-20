@@ -14,6 +14,7 @@ public sealed record Currency : IValueObject
         }
 
         ArgumentOutOfRangeException.ThrowIfNegative(minorUnits);
+        // Amounts are stored as numeric(19,4), so more than four decimals could never be persisted (ADR-0004).
         ArgumentOutOfRangeException.ThrowIfGreaterThan(minorUnits, 4);
 
         Code = code;

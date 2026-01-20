@@ -17,8 +17,10 @@ public sealed record InstitutionCode : IValueObject
 
     public string Value { get; }
 
+    /// <summary>Trims and uppercases, so "fcb " and "FCB" are the same code (spec 001 edge cases).</summary>
     public static string Normalize(string? raw) => (raw ?? string.Empty).Trim().ToUpperInvariant();
 
+    /// <summary>Checks an already-normalized code. ASCII only: codes end up in account numbers and file exports.</summary>
     public static bool IsValid(string normalized) =>
         normalized.Length is >= MinLength and <= MaxLength && normalized.All(char.IsAsciiLetterOrDigit);
 

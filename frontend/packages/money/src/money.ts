@@ -4,6 +4,7 @@ import { getMinorUnits } from './currencies.ts';
 /** Money never touches JavaScript `number` arithmetic (master spec §30.4). Amounts travel as strings. */
 export type MoneyInput = string | Decimal;
 
+/** Thrown by `parseAmount` for anything that is not a plain decimal string; never coerced to zero. */
 export class InvalidAmountError extends Error {
   constructor(value: string) {
     super(`"${value}" is not a valid decimal amount.`);
@@ -21,10 +22,12 @@ export function parseAmount(value: MoneyInput): Decimal {
   return new Decimal(trimmed);
 }
 
+/** Exact sum of any number of amounts (zero when called with none). */
 export function add(...values: MoneyInput[]): Decimal {
   return values.reduce<Decimal>((sum, v) => sum.plus(parseAmount(v)), new Decimal(0));
 }
 
+/** Exact difference `a - b`. */
 export function subtract(a: MoneyInput, b: MoneyInput): Decimal {
   return parseAmount(a).minus(parseAmount(b));
 }
@@ -39,6 +42,7 @@ export function toApiString(value: MoneyInput, currency: string): string {
   return roundToMinorUnits(value, currency).toFixed(getMinorUnits(currency));
 }
 
+/** Display options for `formatMoney`; defaults are the `en-KE` locale and the ISO currency code. */
 export interface FormatMoneyOptions {
   locale?: string;
   currencyDisplay?: 'symbol' | 'narrowSymbol' | 'code' | 'name';

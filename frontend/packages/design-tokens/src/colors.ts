@@ -29,6 +29,7 @@ export const palette = {
   white: '#FFFFFF',
 } as const;
 
+/** Name of a raw palette colour. */
 export type PaletteToken = keyof typeof palette;
 
 /** Semantic tokens — components only use these (§32.2). */
@@ -55,8 +56,10 @@ export interface SemanticColors {
   'info-tint': string;
 }
 
+/** Name of a semantic colour role. */
 export type SemanticToken = keyof SemanticColors;
 
+/** Light theme mapping (§32.2). */
 export const semanticLight: SemanticColors = {
   bg: palette.canvas,
   surface: palette.white,
@@ -80,6 +83,7 @@ export const semanticLight: SemanticColors = {
   'info-tint': palette['cyan-100'],
 };
 
+/** Dark theme mapping (§32.2); same keys as light so components never branch on theme. */
 export const semanticDark: SemanticColors = {
   bg: palette['graphite-950'],
   surface: palette['graphite-900'],

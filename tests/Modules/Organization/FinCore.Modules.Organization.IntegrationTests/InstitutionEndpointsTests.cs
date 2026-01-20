@@ -4,6 +4,7 @@ using FinCore.IntegrationTests.Shared;
 
 namespace FinCore.Modules.Organization.IntegrationTests;
 
+/// <summary>Institution endpoints over HTTP against a real Postgres database (spec 001 AC-6 to AC-11).</summary>
 [Trait("Category", "Integration")]
 public sealed class InstitutionEndpointsTests(PostgresFixture postgres) : IAsyncLifetime
 {
@@ -55,6 +56,7 @@ public sealed class InstitutionEndpointsTests(PostgresFixture postgres) : IAsync
     [Fact]
     public async Task Concurrent_creates_with_same_code_yield_one_201_and_409s() // AC-8 race
     {
+        // Fire the requests together so some get past the handler's pre-check; the unique index must still catch them.
         var responses = await Task.WhenAll(Enumerable.Range(0, 5)
             .Select(_ => _client.CreateAsync(InstitutionApi.Request("RACE1"))));
 

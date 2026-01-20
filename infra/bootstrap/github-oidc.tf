@@ -24,6 +24,7 @@ data "aws_iam_policy_document" "github_trust" {
       values   = ["sts.amazonaws.com"]
     }
 
+    # Scoped to a GitHub environment, so a workflow on a fork or an unprotected branch can't assume the role.
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
@@ -38,7 +39,7 @@ resource "aws_iam_role" "github_deploy" {
   name                 = "fincore-github-deploy-${each.key}"
   description          = "Assumed by GitHub Actions (environment ${each.key}) to deploy FinCore"
   assume_role_policy   = data.aws_iam_policy_document.github_trust[each.key].json
-  max_session_duration = 3600
+  max_session_duration = 3600 # one hour, the shortest maximum AWS allows
 }
 
 # Remote state access for this environment's key only (S3-native locking uses a .tflock object).

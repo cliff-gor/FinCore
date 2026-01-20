@@ -20,6 +20,7 @@ internal sealed class DatabaseInitializer(
         }
 
         await using var scope = scopeFactory.CreateAsyncScope();
+        // Same order as the Migrator, so local start-up and deployments create schemas identically.
         foreach (var database in scope.ServiceProvider.GetServices<ModuleDatabase>().OrderBy(d => d.MigrationOrder))
         {
             var db = (DbContext)scope.ServiceProvider.GetRequiredService(database.DbContextType);

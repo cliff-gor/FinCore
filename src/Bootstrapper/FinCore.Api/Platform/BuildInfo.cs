@@ -12,6 +12,7 @@ internal static class BuildInfo
 
     public static string Product { get; } = Informational.Split('+')[0];
 
+    // CI builds with -p:SourceRevisionId=<sha>, which the SDK appends as "+sha"; local builds have no suffix.
     public static string Commit { get; } = Informational.Contains('+', StringComparison.Ordinal)
         ? Informational.Split('+')[1][..Math.Min(7, Informational.Split('+')[1].Length)]
         : "dev";

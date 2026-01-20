@@ -4,6 +4,8 @@ namespace FinCore.SharedKernel.Domain;
 public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot, IAuditable
     where TId : struct
 {
+    // Events stay in memory until SaveChanges, when the outbox interceptor turns them into outbox rows in the same
+    // transaction. Nothing is published if the transaction rolls back.
     private readonly List<IDomainEvent> _domainEvents = [];
 
     protected AggregateRoot(TId id)
@@ -27,6 +29,7 @@ public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot, IAuditab
 
     public void ClearDomainEvents() => _domainEvents.Clear();
 
+    // Explicit interface implementation: only persistence code that knows about IAuditable can set audit fields.
     void IAuditable.SetCreated(DateTime atUtc, string by)
     {
         CreatedAtUtc = atUtc;

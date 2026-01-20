@@ -46,6 +46,7 @@ case "${MODE}" in
     echo "Running migrator container (${IMAGE})"
     network_args=()
     if [[ -n "${DOCKER_NETWORK:-}" ]]; then network_args=(--network "${DOCKER_NETWORK}"); fi
+    # The `${arr[@]+...}` form expands an empty array safely under `set -u` on bash 3.2 (macOS).
     docker run --rm ${network_args[@]+"${network_args[@]}"} \
       --add-host=host.docker.internal:host-gateway \
       -e ConnectionStrings__fincore \

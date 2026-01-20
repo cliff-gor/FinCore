@@ -15,6 +15,7 @@ const mockRequest = jest.mocked(request);
 const i18n = createI18n({ lng: 'en', plugins: [initReactI18next] });
 
 async function renderHome() {
+  // No retries so failures render at once; gcTime Infinity leaves no cache timer running after the test.
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: Infinity } },
   });

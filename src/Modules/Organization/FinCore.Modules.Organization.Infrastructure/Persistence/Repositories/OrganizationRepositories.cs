@@ -6,6 +6,7 @@ namespace FinCore.Modules.Organization.Infrastructure.Persistence.Repositories;
 
 internal sealed class InstitutionRepository(OrganizationDbContext dbContext) : IInstitutionRepository
 {
+    // Compares through the value converter, so the query hits the unique index on code.
     public Task<bool> CodeExistsAsync(string normalizedCode, CancellationToken cancellationToken) =>
         dbContext.Institutions.AnyAsync(i => i.Code == InstitutionCode.FromStorage(normalizedCode), cancellationToken);
 

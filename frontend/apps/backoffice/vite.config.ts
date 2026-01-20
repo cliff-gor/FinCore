@@ -13,6 +13,8 @@ const GATEWAY = 'https://localhost:7200';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
   const buildInfo = readBuildInfo(APP, pkg.version, env.VITE_APP_ENV);
+  // Proxying /api and /bff keeps the session cookie same-origin in dev, as CloudFront does on AWS (spec §30.3).
+  // `secure: false` accepts the self-signed ASP.NET Core dev certificate on the local gateway.
   const toGateway: ProxyOptions = { target: GATEWAY, changeOrigin: true, secure: false };
   const proxy = { '/api': toGateway, '/bff': toGateway };
 
@@ -25,12 +27,14 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       fincoreVersionPlugin(buildInfo),
     ],
+    // Fixed ports (Playwright targets the preview port), so fail fast instead of moving to a free one.
     server: { port: 5173, strictPort: true, proxy },
     preview: { port: 4173, strictPort: true, proxy },
     test: {
       environment: 'jsdom',
       setupFiles: ['./src/test/setup.ts'],
       include: ['src/**/*.test.{ts,tsx}'],
+      // Component tests assert behaviour, not styling, so CSS is not processed.
       css: false,
     },
   };

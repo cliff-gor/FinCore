@@ -2,6 +2,7 @@ import { hasPermission, type PermissionGrant } from '@fincore/permissions';
 import type { ReactNode } from 'react';
 import { useSession } from './use-session.ts';
 
+/** Props for `Can`; `fallback` renders when the permission is missing (default: nothing). */
 export interface CanProps {
   permission: PermissionGrant;
   children: ReactNode;
@@ -11,6 +12,7 @@ export interface CanProps {
 /** `<Can permission="loans.approve">` — UI convenience only; the API always enforces authorization. */
 export function Can({ permission, children, fallback = null }: CanProps) {
   const session = useSession();
+  // Hidden while the session loads or errors, so a privileged action never flashes into view.
   const allowed =
     session.status === 'signed-in' && hasPermission(session.user.permissions, permission);
   return <>{allowed ? children : fallback}</>;

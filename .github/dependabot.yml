@@ -7,9 +7,11 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    # Conventional Commit prefixes, so Dependabot PRs pass the commit-message check in ci.yml.
     commit-message:
       prefix: chore
       include: scope
+    # Packages released together (framework, test stack) arrive as one PR instead of a dozen.
     groups:
       microsoft:
         patterns: ["Microsoft.*", "System.*", "Aspire.*"]
@@ -24,6 +26,7 @@ updates:
     commit-message:
       prefix: chore
       include: scope
+    # Expo SDK packages and React Native must move in lockstep, so they always arrive in one PR.
     groups:
       expo:
         patterns: ["expo", "expo-*", "@expo/*", "react-native", "react-native-*"]

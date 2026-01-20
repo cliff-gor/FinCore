@@ -11,6 +11,7 @@ export const minorUnits: Readonly<Record<string, number>> = {
   TZS: 2,
 };
 
+/** Number of decimal places for a currency code (case-insensitive). */
 export function getMinorUnits(currency: string): number {
   const code = currency.toUpperCase();
   const known = minorUnits[code];

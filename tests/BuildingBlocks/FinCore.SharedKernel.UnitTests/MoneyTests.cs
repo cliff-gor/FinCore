@@ -2,6 +2,7 @@ using FinCore.SharedKernel.Money;
 
 namespace SharedKernelTests;
 
+/// <summary>Money arithmetic and rounding rules from ADR-0004 (spec 001 AC-5).</summary>
 public sealed class MoneyTests
 {
     private static readonly Currency Kes = new("KES", 2);

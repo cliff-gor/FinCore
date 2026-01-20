@@ -12,6 +12,7 @@ public class Result : IResultFactory<Result>
 {
     protected Result(bool isSuccess, Error error)
     {
+        // Guard against impossible states early; a success carrying an error would silently hide a failure.
         if (isSuccess && error != Error.None)
         {
             throw new ArgumentException("A successful result cannot carry an error.", nameof(error));
@@ -52,6 +53,10 @@ public sealed class Result<T> : Result, IResultFactory<Result<T>>
     internal Result(T? value, bool isSuccess, Error error)
         : base(isSuccess, error) => _value = value;
 
+    /// <summary>
+    /// The success value. Reading it from a failed result throws, because that is a programming error,
+    /// not a business outcome.
+    /// </summary>
     public T Value => IsSuccess
         ? _value!
         : throw new InvalidOperationException("The value of a failed result cannot be accessed.");

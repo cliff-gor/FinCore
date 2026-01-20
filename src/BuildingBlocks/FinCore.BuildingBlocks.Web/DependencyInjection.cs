@@ -12,6 +12,7 @@ public static class DependencyInjection
     public static IServiceCollection AddWebBuildingBlocks(this IServiceCollection services)
     {
         services.AddHttpContextAccessor();
+        // Replace, not add: infrastructure registers a system-user fallback for hosts without HTTP (e.g. the Migrator).
         services.Replace(ServiceDescriptor.Scoped<ICurrentUser, HttpCurrentUser>());
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();

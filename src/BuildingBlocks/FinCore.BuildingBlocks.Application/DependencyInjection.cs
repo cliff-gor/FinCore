@@ -12,6 +12,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplicationBuildingBlocks(this IServiceCollection services)
     {
         services.AddScoped<IDispatcher, Dispatcher>();
+        // Order matters: logging wraps validation, so rejected requests are logged with their failure code too.
         services.AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
         services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         return services;
@@ -34,6 +35,7 @@ public static class DependencyInjection
             }
         }
 
+        // Validators are internal sealed by convention (spec §34), so internal types must be included explicitly.
         services.AddValidatorsFromAssembly(assembly, ServiceLifetime.Scoped, includeInternalTypes: true);
         return services;
     }

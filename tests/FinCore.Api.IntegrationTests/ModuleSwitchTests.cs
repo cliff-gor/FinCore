@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace FinCore.Api.IntegrationTests;
 
+/// <summary>A switched-off module keeps its schema but exposes nothing: no routes, no subscribers (spec 001 AC-19).</summary>
 [Trait("Category", "Integration")]
 public sealed class ModuleSwitchTests(PostgresFixture postgres)
 {

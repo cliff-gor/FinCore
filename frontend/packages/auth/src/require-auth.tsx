@@ -3,13 +3,17 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { signIn, useSession } from './use-session.ts';
 
+/** Props for `RequireAuth`. */
 export interface RequireAuthProps {
   children: ReactNode;
   /** Shown while the session is loading. */
   fallback?: ReactNode;
 }
 
-/** Renders children only for a signed-in user; otherwise a sign-in prompt (M0 placeholder, real OIDC in M1). */
+/**
+ * Renders children only for a signed-in user; otherwise a sign-in prompt. When the BFF is unreachable the prompt
+ * says so instead of claiming the user is signed out.
+ */
 export function RequireAuth({ children, fallback }: RequireAuthProps) {
   const { t } = useTranslation();
   const session = useSession();

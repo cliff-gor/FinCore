@@ -28,6 +28,8 @@ public abstract class ModuleDbContext(DbContextOptions options) : DbContext(opti
         {
             return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken).ConfigureAwait(false);
         }
+        // Translate the provider-specific error into an application-level exception, so handlers can turn a lost
+        // race into a Conflict result without referencing Npgsql.
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } pg)
         {
             throw UniqueConstraintViolationException.For(pg.ConstraintName, ex);
@@ -47,6 +49,7 @@ public abstract class ModuleDbContext(DbContextOptions options) : DbContext(opti
             b.Property(m => m.Type).HasMaxLength(500);
             b.Property(m => m.Content).HasColumnType("jsonb");
             b.Property(m => m.TraceParent).HasMaxLength(128);
+            // Partial index over pending rows only: the processor's query stays fast however many processed rows pile up.
             b.HasIndex(m => new { m.OccurredOnUtc, m.ProcessedOnUtc })
                 .HasFilter("processed_on_utc IS NULL AND dead_lettered_on_utc IS NULL");
         });
@@ -60,7 +63,8 @@ public abstract class ModuleDbContext(DbContextOptions options) : DbContext(opti
 
         base.OnModelCreating(modelBuilder);
 
-        // Optimistic concurrency on every aggregate via PostgreSQL's xmin system column (spec §9).
+        // Optimistic concurrency on every aggregate via PostgreSQL's xmin system column (spec §9). A uint row-version
+        // property maps to xmin in Npgsql, so no extra column is created and every update is checked automatically.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes()
                      .Where(t => typeof(IAggregateRoot).IsAssignableFrom(t.ClrType) && t.BaseType is null))
         {

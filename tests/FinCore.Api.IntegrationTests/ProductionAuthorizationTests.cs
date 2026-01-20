@@ -3,6 +3,10 @@ using FinCore.IntegrationTests.Shared;
 
 namespace FinCore.Api.IntegrationTests;
 
+/// <summary>
+/// Outside Development no permission source exists until Identity (M1), so module endpoints must refuse every
+/// request, while health and version stay reachable for load balancers and support (spec 001 AC-12).
+/// </summary>
 [Trait("Category", "Integration")]
 public sealed class ProductionAuthorizationTests(PostgresFixture postgres)
 {

@@ -10,6 +10,7 @@ export interface BuildInfo {
   environment: string;
 }
 
+// Falls back to `dev` outside a git checkout (e.g. a source tarball) rather than failing the build.
 function readGitSha(): string {
   try {
     const sha = execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })
@@ -21,6 +22,7 @@ function readGitSha(): string {
   }
 }
 
+/** Collects build metadata. A `GIT_SHA` environment variable wins over asking git, for builds without `.git`. */
 export function readBuildInfo(app: string, version: string, environment?: string): BuildInfo {
   return {
     app,

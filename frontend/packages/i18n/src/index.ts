@@ -2,14 +2,19 @@ import i18next, { type i18n as I18nInstance, type InitOptions } from 'i18next';
 import common from './locales/en/common.json';
 import errors from './locales/en/errors.json';
 
+/** Namespace used when a key has no `ns:` prefix. */
 export const defaultNS = 'common';
+/** Languages with shipped translations; anything else falls back to English. */
 export const supportedLanguages = ['en'] as const;
+/** A language code from `supportedLanguages`. */
 export type SupportedLanguage = (typeof supportedLanguages)[number];
 
+/** Translations bundled into the app (no network loading), so the first render is already translated. */
 export const resources = {
   en: { common, errors },
 } as const;
 
+/** Backend error codes that have a translated message in `errors.json`. */
 export type ErrorCode = keyof typeof errors;
 
 /**
@@ -26,10 +31,13 @@ export function createI18n(
     lng: options.lng ?? 'en',
     fallbackLng: 'en',
     supportedLngs: [...supportedLanguages],
+    // Regional variants such as `en-KE` resolve to `en`.
     nonExplicitSupportedLngs: true,
     ns: ['common', 'errors'],
     defaultNS,
+    // React and React Native already escape rendered text; escaping here would double-encode.
     interpolation: { escapeValue: false },
+    // Resources are bundled, so initialise synchronously and `t()` works on the first render.
     initAsync: false,
   };
   void instance.init(init);

@@ -11,5 +11,9 @@ public interface IStronglyTypedId
 
 public static class StronglyTypedId
 {
+    /// <summary>
+    /// New UUID v7. Time-ordered ids keep B-tree inserts at the end of the index instead of scattering them
+    /// like random v4 GUIDs do.
+    /// </summary>
     public static Guid NewValue() => Guid.CreateVersion7();
 }

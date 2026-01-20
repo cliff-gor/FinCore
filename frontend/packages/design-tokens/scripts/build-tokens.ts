@@ -35,6 +35,7 @@ function tailwindTheme(): string {
   lines.push(`  --font-sans: ${fontFamilies.sans.join(', ')};`);
   lines.push(`  --font-serif: ${fontFamilies.serif.join(', ')};`);
   for (const [name, style] of Object.entries(typeScale)) {
+    // rem rather than px so text follows the user's browser font-size setting.
     lines.push(`  --text-${name}: ${style.size / 16}rem;`);
     lines.push(`  --text-${name}--line-height: ${style.lineHeight / 16}rem;`);
     lines.push(`  --text-${name}--font-weight: ${style.weight};`);
@@ -45,6 +46,8 @@ function tailwindTheme(): string {
     lines.push(`  --duration-${name}: ${value}ms;`);
   }
   lines.push(`  --ease-standard: ${motion.easing.standard};`);
+  // Semantic colours point at runtime `--fc-*` variables (`@theme inline`), so switching `data-theme` re-themes
+  // the page without rebuilding CSS.
   lines.push('}', '', '@theme inline {');
   for (const name of Object.keys(semanticLight))
     lines.push(`  --color-${name}: var(--fc-${name});`);
@@ -57,6 +60,7 @@ function nativewindTheme(): string {
   const px = (record: Record<string | number, number>): Record<string, string> =>
     Object.fromEntries(Object.entries(record).map(([k, v]) => [k, `${v}px`]));
   const theme = {
+    // Light semantic colours are the defaults; dark ones are exposed as `dark-*` classes.
     colors: { ...palette, ...semanticLight, dark: semanticDark },
     spacing: px(spacing),
     borderRadius: px(radius),

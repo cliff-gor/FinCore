@@ -28,6 +28,9 @@ public sealed class OrganizationModule : IModule
     {
         var enabled = ModuleSwitch.IsEnabled(configuration, ModuleName);
 
+        // The DbContext is registered even when the module is switched off: migrations must still run so the
+        // schema is ready the day the module is enabled (spec §33.7.4).
+
         services.AddModuleDbContext<OrganizationDbContext>(
             configuration, ModuleName, OrganizationDbContext.SchemaName, migrationOrder: 1, enabled);
 
@@ -36,11 +39,13 @@ public sealed class OrganizationModule : IModule
         services.AddScoped<ICurrencyCatalog, CurrencyCatalog>();
         services.AddScoped<IOrganizationUnitOfWork, OrganizationUnitOfWork>();
         services.AddScoped<IOrganizationQueries, OrganizationQueries>();
+        // One implementation serves both the module's public API and the platform-wide business date provider.
         services.AddScoped<OrganizationModuleApi>();
         services.AddScoped<IOrganizationModuleApi>(sp => sp.GetRequiredService<OrganizationModuleApi>());
         services.AddScoped<IBusinessDateProvider>(sp => sp.GetRequiredService<OrganizationModuleApi>());
         services.AddDomainEventMapper<InstitutionCreatedMapper>();
 
+        // Subscriptions, like endpoints and jobs, exist only while the module is enabled.
         if (enabled)
         {
             services.AddIntegrationEventHandler<InstitutionCreatedIntegrationEvent, InstitutionCreatedLoggingHandler, OrganizationDbContext>();

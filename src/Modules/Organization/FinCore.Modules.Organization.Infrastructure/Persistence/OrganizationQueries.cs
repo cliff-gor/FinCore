@@ -6,6 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinCore.Modules.Organization.Infrastructure.Persistence;
 
+/// <summary>
+/// Read side of the module: no-tracking queries projected straight into response DTOs, so reads never load
+/// aggregates or their domain events (spec §6, lightweight CQRS).
+/// </summary>
 internal sealed class OrganizationQueries(OrganizationDbContext dbContext) : IOrganizationQueries
 {
     public Task<InstitutionResponse?> GetInstitutionAsync(Guid id, CancellationToken cancellationToken) =>
@@ -15,6 +19,7 @@ internal sealed class OrganizationQueries(OrganizationDbContext dbContext) : IOr
     public async Task<PagedResult<InstitutionResponse>> ListInstitutionsAsync(int page, int pageSize, CancellationToken cancellationToken)
     {
         var query = dbContext.Institutions.AsNoTracking();
+        // Order by code so paging is stable: without a deterministic order, rows can repeat or vanish between pages.
         var total = await query.CountAsync(cancellationToken).ConfigureAwait(false);
         var items = await Project(query.OrderBy(i => i.Code).Skip((page - 1) * pageSize).Take(pageSize))
             .ToListAsync(cancellationToken)

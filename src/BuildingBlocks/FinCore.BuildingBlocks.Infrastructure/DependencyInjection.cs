@@ -35,7 +35,10 @@ public static class DependencyInjection
         services.AddMetrics();
         services.AddOptions<OutboxOptions>().Bind(configuration.GetSection(OutboxOptions.SectionName));
 
+        // RAM job store for M0: jobs are recreated at start-up. EOD (M5) moves Quartz to the clustered Postgres store so
+        // two API tasks never run the same job twice (spec §33.5).
         services.AddQuartz();
+        // Let in-flight jobs (e.g. an outbox batch) finish on shutdown instead of being cut off mid-publish.
         services.AddQuartzHostedService(o => o.WaitForJobsToComplete = true);
 
         services.AddDbContext<PlatformDbContext>(options =>
@@ -123,6 +126,7 @@ public static class DependencyInjection
             ?? throw new InvalidOperationException($"Connection string '{ConnectionStringName}' is not configured.");
 
         options
+            // Each module keeps its migrations history in its own schema, so modules migrate independently (spec §11).
             .UseNpgsql(connectionString, npgsql => npgsql.MigrationsHistoryTable(ModuleDbContext.MigrationsHistoryTable, schema))
             .UseSnakeCaseNamingConvention();
     }

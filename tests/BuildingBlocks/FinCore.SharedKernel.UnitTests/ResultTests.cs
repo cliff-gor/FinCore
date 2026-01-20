@@ -2,6 +2,7 @@ using FinCore.SharedKernel.Results;
 
 namespace SharedKernelTests;
 
+/// <summary>Result and Error semantics that every handler and endpoint depends on.</summary>
 public sealed class ResultTests
 {
     private static readonly Error SomeError = Error.NotFound("Test.NotFound", "missing");

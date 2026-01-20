@@ -34,6 +34,7 @@ public sealed class DomainEventsToOutboxInterceptor(IDomainEventMapperRegistry m
             .Where(a => a.DomainEvents.Count > 0)
             .ToList();
 
+        // Capture the current trace so the asynchronous publish later appears in the same distributed trace (spec §27).
         var traceParent = Activity.Current?.Id;
 
         foreach (var aggregate in aggregates)
@@ -41,6 +42,7 @@ public sealed class DomainEventsToOutboxInterceptor(IDomainEventMapperRegistry m
             foreach (var domainEvent in aggregate.DomainEvents)
             {
                 var integrationEvent = mappers.Map(domainEvent);
+                // Events without a mapper are internal to the module and never leave it.
                 if (integrationEvent is null)
                 {
                     continue;
@@ -57,6 +59,7 @@ public sealed class DomainEventsToOutboxInterceptor(IDomainEventMapperRegistry m
                 });
             }
 
+            // Clear after staging so a second SaveChanges in the same unit of work cannot enqueue duplicates.
             aggregate.ClearDomainEvents();
         }
     }

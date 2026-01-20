@@ -12,6 +12,8 @@ internal sealed class HttpCurrentUser(IHttpContextAccessor accessor) : ICurrentU
 
     public bool IsAuthenticated => User?.Identity?.IsAuthenticated == true;
 
+    // Audit columns need a value even without a signed-in user: "system" for background work (no HTTP context),
+    // "anonymous" for unauthenticated requests (only possible in Development in M0).
     public string Id =>
         IsAuthenticated
             ? User!.FindFirstValue("sub") ?? User!.FindFirstValue(ClaimTypes.NameIdentifier) ?? "unknown"

@@ -1,12 +1,15 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    // Expo's base is looser than tsconfig.base.json; these mirror the web settings so shared packages
+    // type-check the same way here.
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "noEmit": true,
+    // Jest globals for the component tests (jest-expo).
     "types": ["jest"],
     "paths": {
       "@/*": ["./src/*"]

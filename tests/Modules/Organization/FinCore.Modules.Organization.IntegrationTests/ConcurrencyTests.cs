@@ -10,6 +10,8 @@ namespace FinCore.Modules.Organization.IntegrationTests;
 [Trait("Category", "Integration")]
 public sealed class ConcurrencyTests(PostgresFixture postgres)
 {
+    // Two contexts load the same row; the second writer must fail instead of silently overwriting the first.
+    // No update endpoint exists in M0, so the test drives EF directly to prove the base infrastructure.
     [Fact]
     public async Task Concurrent_update_of_an_aggregate_is_rejected_by_xmin()
     {

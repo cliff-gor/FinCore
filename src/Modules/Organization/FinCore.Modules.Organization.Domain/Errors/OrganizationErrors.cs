@@ -3,8 +3,14 @@ using FinCore.SharedKernel.Results;
 
 namespace FinCore.Modules.Organization.Domain.Errors;
 
+/// <summary>
+/// Every failure the Organization module can report. Codes are part of the public API contract: front ends translate
+/// them (packages/i18n), so rename a code only together with a breaking-change note.
+/// </summary>
 public static class OrganizationErrors
 {
+    // Field-level failures are ValidationErrors so they surface in ProblemDetails `errors` under the request field name.
+
     public static readonly Error InvalidInstitutionCode = ValidationError.For(
         "code", $"Code must be {InstitutionCode.MinLength}–{InstitutionCode.MaxLength} letters or digits.");
 
@@ -23,6 +29,7 @@ public static class OrganizationErrors
     public static readonly Error CurrencyNotSupported = ValidationError.For(
         "baseCurrency", "This currency is not supported.");
 
+    // Business-rule failures carry a stable, module-prefixed code (spec §28).
     public static readonly Error InstitutionCodeTaken = Error.Conflict(
         "Organization.InstitutionCodeTaken", "An institution with this code already exists.");
 
