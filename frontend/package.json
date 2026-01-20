@@ -1,0 +1,29 @@
+{
+  "name": "fincore-frontend",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.28.2",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev --filter=@fincore/backoffice --filter=@fincore/portal",
+    "build": "turbo run build",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "e2e": "turbo run e2e",
+    "api:generate": "node scripts/api-generate.ts",
+    "api:check": "pnpm api:generate && git diff --exit-code -- packages/api-client/src/generated && test -z \"$(git status --porcelain -- packages/api-client/src/generated)\""
+  },
+  "devDependencies": {
+    "@fincore/config": "workspace:*",
+    "eslint": "10.12.0",
+    "orval": "8.40.0",
+    "prettier": "3.9.10",
+    "turbo": "2.11.7",
+    "typescript": "6.0.3"
+  }
+}

@@ -1,0 +1,11 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Expo SDK 54+ supports pnpm's isolated layout; switch to `nodeLinker: hoisted` only if a native
+# library breaks on symlinks (master spec §31.2).
+nodeLinker: isolated
+
+# Only these dependencies may run install scripts.
+allowBuilds:
+  esbuild: true
