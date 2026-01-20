@@ -1,0 +1,12 @@
+{
+  "Organization.InstitutionCodeTaken": "An institution with this code already exists.",
+  "Organization.InstitutionNotFound": "The institution could not be found.",
+  "Validation": "Some fields need your attention.",
+  "Http.Unauthorized": "Your session has ended. Please sign in again.",
+  "Http.Forbidden": "You do not have permission to do this.",
+  "Http.NotFound": "We could not find what you were looking for.",
+  "Http.Conflict": "This item was changed by someone else. Reload to see the latest version.",
+  "Http.UpgradeRequired": "Please update the app to continue.",
+  "Network": "You appear to be offline. Check your connection and try again.",
+  "Unknown": "Something went wrong. Please try again."
+}

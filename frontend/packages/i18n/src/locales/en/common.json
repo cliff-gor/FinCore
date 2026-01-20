@@ -1,0 +1,32 @@
+{
+  "app": {
+    "backofficeName": "FinCore Back Office",
+    "portalName": "FinCore",
+    "mobileName": "FinCore"
+  },
+  "home": {
+    "title": "Welcome to FinCore",
+    "backofficeSubtitle": "Operations workspace. Modules appear here as they are enabled.",
+    "portalSubtitle": "Your accounts, cards and loans will appear here."
+  },
+  "session": {
+    "checking": "Checking your session…",
+    "signedOut": "You are signed out.",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "signedInAs": "Signed in as {{name}}",
+    "unavailable": "We could not reach the sign-in service. Try again shortly."
+  },
+  "health": {
+    "title": "Service status",
+    "checking": "Checking the FinCore service…",
+    "healthy": "FinCore is online",
+    "unhealthy": "FinCore is not reachable",
+    "retry": "Try again",
+    "updateRequiredTitle": "Update required",
+    "updateRequiredBody": "This version of FinCore is no longer supported. Please update the app to continue."
+  },
+  "footer": {
+    "version": "v{{version}} · {{sha}} · {{env}}"
+  }
+}

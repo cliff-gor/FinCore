@@ -1,0 +1,19 @@
+{
+  "name": "@fincore/design-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tailwind-theme.css": "./build/tailwind-theme.css",
+    "./nativewind": "./build/nativewind.js"
+  },
+  "scripts": {
+    "build": "node scripts/build-tokens.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "6.0.3"
+  }
+}
