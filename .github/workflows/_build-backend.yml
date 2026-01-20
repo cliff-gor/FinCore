@@ -1,0 +1,32 @@
+# Reusable workflow STUB: test + build api/gateway/migrator images (ARM64) and push to ECR (master spec §33.8.1).
+# Not configured until the AWS deployment spec is implemented — it only reports that.
+# TODO(aws-spec): implement.
+name: build-backend
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+    outputs:
+      image_tag:
+        description: "Image tag that was built (stub: the commit SHA)"
+        value: ${{ jobs.stub.outputs.image_tag }}
+
+permissions:
+  contents: read
+
+jobs:
+  stub:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.info.outputs.image_tag }}
+    steps:
+      - id: info
+        env:
+          INPUT_ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          echo "build-backend: not configured until the AWS deployment spec is implemented (spec 001)."
+          echo "  environment=${INPUT_ENVIRONMENT}"
+          echo "image_tag=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"

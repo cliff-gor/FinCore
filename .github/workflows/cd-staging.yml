@@ -1,0 +1,95 @@
+# Deploy changed components to Staging (master spec §33.8.3, §33.8.4).
+#
+# DISABLED until AWS is set up (spec 001: no AWS in M0). Runs on manual dispatch only, and the
+# reusable _*.yml workflows it calls are stubs that only echo "not configured".
+# TODO(aws-spec): enable the push trigger below and implement the reusable workflows.
+#
+# TODO: pin actions to a full commit SHA once the pipeline works (§33.8.4 note).
+name: cd-staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      all:
+        description: "Deploy every component regardless of detected changes"
+        type: boolean
+        default: true
+  # push:
+  #   branches: [main]
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      infra: ${{ steps.f.outputs.infra == 'true' || inputs.all }}
+      backend: ${{ steps.f.outputs.backend == 'true' || inputs.all }}
+      backoffice: ${{ steps.f.outputs.backoffice == 'true' || inputs.all }}
+      portal: ${{ steps.f.outputs.portal == 'true' || inputs.all }}
+      mobile: ${{ steps.f.outputs.mobile == 'true' || inputs.all }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: f
+        uses: dorny/paths-filter@v4
+        with:
+          filters: |
+            infra:      ['infra/**']
+            backend:    ['src/**', 'Directory.*.props', 'global.json']
+            backoffice: ['frontend/apps/backoffice/**', 'frontend/packages/**']
+            portal:     ['frontend/apps/portal/**', 'frontend/packages/**']
+            mobile:     ['frontend/apps/mobile/**', 'frontend/packages/**']
+
+  infra:
+    needs: changes
+    if: needs.changes.outputs.infra == 'true'
+    uses: ./.github/workflows/_infra.yml
+    with: { environment: staging, apply: true }
+    secrets: inherit
+
+  backend-build:
+    needs: [changes, infra]
+    if: always() && needs.changes.outputs.backend == 'true' && needs.infra.result != 'failure'
+    uses: ./.github/workflows/_build-backend.yml
+    with: { environment: staging }
+    secrets: inherit
+
+  backend-deploy:
+    needs: backend-build
+    uses: ./.github/workflows/_deploy-backend.yml
+    with:
+      environment: staging
+      image_tag: ${{ needs.backend-build.outputs.image_tag }}
+    secrets: inherit
+
+  web:
+    needs: [changes, infra]
+    if: always() && needs.infra.result != 'failure' && (needs.changes.outputs.backoffice == 'true' || needs.changes.outputs.portal == 'true')
+    strategy:
+      matrix:
+        app: [backoffice, portal]
+    uses: ./.github/workflows/_deploy-web.yml
+    with:
+      environment: staging
+      app: ${{ matrix.app }}
+      changed: ${{ needs.changes.outputs[matrix.app] }}
+    secrets: inherit
+
+  mobile-ota:
+    needs: changes
+    if: needs.changes.outputs.mobile == 'true'
+    uses: ./.github/workflows/_mobile-update.yml
+    with: { channel: preview }
+    secrets: inherit
+
+  smoke:
+    needs: [backend-deploy, web]
+    if: always() && !contains(needs.*.result, 'failure')
+    uses: ./.github/workflows/_smoke-test.yml
+    with: { environment: staging }

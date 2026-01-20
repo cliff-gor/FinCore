@@ -1,0 +1,31 @@
+# Reusable workflow STUB: terraform plan/apply for an environment (master spec §33.8.1).
+# Not configured until the AWS deployment spec is implemented — it only reports that.
+# TODO(aws-spec): implement.
+name: infra
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      apply:
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  stub:
+    runs-on: ubuntu-latest
+    steps:
+      - id: info
+        env:
+          INPUT_ENVIRONMENT: ${{ inputs.environment }}
+          INPUT_APPLY: ${{ inputs.apply }}
+        run: |
+          echo "infra: not configured until the AWS deployment spec is implemented (spec 001)."
+          echo "  environment=${INPUT_ENVIRONMENT}"
+          echo "  apply=${INPUT_APPLY}"

@@ -1,0 +1,25 @@
+# Reusable workflow STUB: /health/ready, /api/version commit check, web pages load (deploy/scripts/smoke-test.sh) (master spec §33.8.1).
+# Not configured until the AWS deployment spec is implemented — it only reports that.
+# TODO(aws-spec): implement.
+name: smoke-test
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  stub:
+    runs-on: ubuntu-latest
+    steps:
+      - id: info
+        env:
+          INPUT_ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          echo "smoke-test: not configured until the AWS deployment spec is implemented (spec 001)."
+          echo "  environment=${INPUT_ENVIRONMENT}"

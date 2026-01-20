@@ -1,0 +1,25 @@
+# Reusable workflow STUB: EAS Update to a channel (master spec §33.8.1).
+# Not configured until the AWS deployment spec is implemented — it only reports that.
+# TODO(aws-spec): implement.
+name: mobile-update
+
+on:
+  workflow_call:
+    inputs:
+      channel:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  stub:
+    runs-on: ubuntu-latest
+    steps:
+      - id: info
+        env:
+          INPUT_CHANNEL: ${{ inputs.channel }}
+        run: |
+          echo "mobile-update: not configured until the AWS deployment spec is implemented (spec 001)."
+          echo "  channel=${INPUT_CHANNEL}"

@@ -1,0 +1,30 @@
+# Reusable workflow STUB: run the migrator task, then deploy api and gateway (master spec §33.8.1).
+# Not configured until the AWS deployment spec is implemented — it only reports that.
+# TODO(aws-spec): implement.
+name: deploy-backend
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      image_tag:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  stub:
+    runs-on: ubuntu-latest
+    steps:
+      - id: info
+        env:
+          INPUT_ENVIRONMENT: ${{ inputs.environment }}
+          INPUT_IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          echo "deploy-backend: not configured until the AWS deployment spec is implemented (spec 001)."
+          echo "  environment=${INPUT_ENVIRONMENT}"
+          echo "  image_tag=${INPUT_IMAGE_TAG}"
