@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\FinCore.Modules.Organization.Domain\FinCore.Modules.Organization.Domain.csproj" />
+    <ProjectReference Include="..\FinCore.Modules.Organization.Contracts\FinCore.Modules.Organization.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\FinCore.BuildingBlocks.Application\FinCore.BuildingBlocks.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="FinCore.Modules.Organization.UnitTests" />
+    <InternalsVisibleTo Include="FinCore.Modules.Organization.Infrastructure" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+</Project>

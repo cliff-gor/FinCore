@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\FinCore.Modules.Organization.Application\FinCore.Modules.Organization.Application.csproj" />
+    <!-- The module's IModule maps its own endpoints (spec §8: host only registers modules). -->
+    <ProjectReference Include="..\FinCore.Modules.Organization.Presentation\FinCore.Modules.Organization.Presentation.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\FinCore.BuildingBlocks.Infrastructure\FinCore.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\FinCore.BuildingBlocks.Web\FinCore.BuildingBlocks.Web.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="FinCore.Modules.Organization.IntegrationTests" />
+  </ItemGroup>
+</Project>
