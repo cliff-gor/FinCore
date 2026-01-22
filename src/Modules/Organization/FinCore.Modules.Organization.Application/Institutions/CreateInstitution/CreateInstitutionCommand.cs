@@ -9,4 +9,7 @@ public sealed record CreateInstitutionCommand(
     InstitutionType Type,
     string BaseCurrency,
     string? LicenseNumber,
-    DateOnly InitialBusinessDate) : ICommand<InstitutionResponse>;
+    DateOnly InitialBusinessDate) : ICommand<InstitutionResponse>, FinCore.BuildingBlocks.Application.Audit.IAuditableCommand
+{
+    public string AuditEntityId => Code;
+}
