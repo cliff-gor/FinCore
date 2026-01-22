@@ -1,6 +1,8 @@
+using FinCore.BuildingBlocks.Application.Audit;
 using FinCore.BuildingBlocks.Application.EventBus;
 using FinCore.BuildingBlocks.Application.Idempotency;
 using FinCore.BuildingBlocks.Application.Security;
+using FinCore.BuildingBlocks.Infrastructure.Audit;
 using FinCore.BuildingBlocks.Infrastructure.EventBus;
 using FinCore.BuildingBlocks.Infrastructure.Idempotency;
 using FinCore.BuildingBlocks.Infrastructure.Inbox;
@@ -41,10 +43,10 @@ public static class DependencyInjection
         // Let in-flight jobs (e.g. an outbox batch) finish on shutdown instead of being cut off mid-publish.
         services.AddQuartzHostedService(o => o.WaitForJobsToComplete = true);
 
-        services.AddDbContext<PlatformDbContext>(options =>
-            UsePostgres(options, configuration, PlatformDbContext.Schema));
-        services.AddSingleton(new ModuleDatabase("Platform", typeof(PlatformDbContext), MigrationOrder: 0));
+        services.AddPlatformDatabase(configuration);
         services.TryAddScoped<IIdempotencyStore, PostgresIdempotencyStore>();
+        services.TryAddScoped<IAuditLog, PostgresAuditLog>();
+        services.TryAddScoped<IRequestContext, NoRequestContext>();
         services.AddQuartz(q =>
         {
             var key = new JobKey("platform-purge-idempotency");
@@ -52,6 +54,19 @@ public static class DependencyInjection
             q.AddTrigger(t => t.ForJob(key).WithSimpleSchedule(s => s.WithInterval(TimeSpan.FromHours(1)).RepeatForever()));
         });
 
+        return services;
+    }
+
+    /// <summary>
+    /// Registers only the platform database (idempotency, audit, BFF sessions, Data Protection keys). The gateway uses
+    /// this on its own: it needs sessions and keys but none of the API's jobs, outbox or event bus.
+    /// </summary>
+    public static IServiceCollection AddPlatformDatabase(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddDbContext<PlatformDbContext>(options =>
+            UsePostgres(options, configuration, PlatformDbContext.Schema));
+        services.AddSingleton(new ModuleDatabase("Platform", typeof(PlatformDbContext), MigrationOrder: 0));
         return services;
     }
 

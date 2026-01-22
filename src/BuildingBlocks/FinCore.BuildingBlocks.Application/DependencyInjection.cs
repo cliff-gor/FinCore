@@ -8,12 +8,14 @@ namespace FinCore.BuildingBlocks.Application;
 
 public static class DependencyInjection
 {
-    /// <summary>Registers the dispatcher and the standard pipeline (logging → validation → handler).</summary>
+    /// <summary>Registers the dispatcher and the standard pipeline (logging → audit → validation → handler).</summary>
     public static IServiceCollection AddApplicationBuildingBlocks(this IServiceCollection services)
     {
         services.AddScoped<IDispatcher, Dispatcher>();
         // Order matters: logging wraps validation, so rejected requests are logged with their failure code too.
         services.AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+        // Audit sits outside validation so only commands that passed validation and succeeded are recorded.
+        services.AddScoped(typeof(IPipelineBehavior<,>), typeof(AuditBehavior<,>));
         services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         return services;
     }
