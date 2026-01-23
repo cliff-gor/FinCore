@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\FinCore.Modules.Identity.Application\FinCore.Modules.Identity.Application.csproj" />
+    <!-- The module's IModule maps its own endpoints (ADR-0001). -->
+    <ProjectReference Include="..\FinCore.Modules.Identity.Presentation\FinCore.Modules.Identity.Presentation.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\FinCore.BuildingBlocks.Infrastructure\FinCore.BuildingBlocks.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\FinCore.BuildingBlocks.Web\FinCore.BuildingBlocks.Web.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="FinCore.Modules.Identity.IntegrationTests" />
+  </ItemGroup>
+</Project>
