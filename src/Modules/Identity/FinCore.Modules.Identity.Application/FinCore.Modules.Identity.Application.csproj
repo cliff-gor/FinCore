@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\FinCore.Modules.Identity.Domain\FinCore.Modules.Identity.Domain.csproj" />
+    <ProjectReference Include="..\FinCore.Modules.Identity.Contracts\FinCore.Modules.Identity.Contracts.csproj" />
+    <ProjectReference Include="..\..\Organization\FinCore.Modules.Organization.Contracts\FinCore.Modules.Organization.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\FinCore.BuildingBlocks.Application\FinCore.BuildingBlocks.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="FinCore.Modules.Identity.UnitTests" />
+    <InternalsVisibleTo Include="FinCore.Modules.Identity.Infrastructure" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+</Project>
