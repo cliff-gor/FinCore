@@ -1,5 +1,7 @@
 using System.Reflection;
+using FinCore.BuildingBlocks.Application.Security;
 using FinCore.BuildingBlocks.Web;
+using FinCore.BuildingBlocks.Web.Authorization;
 
 namespace FinCore.Api;
 
@@ -24,20 +26,21 @@ internal static class ModuleRegistry
             services.AddSingleton(module);
         }
 
+        services.AddSingleton<IEnabledModules>(new EnabledModules(
+            modules.Where(m => ModuleSwitch.IsEnabled(configuration, m.Name)).Select(m => m.Name).Order(StringComparer.Ordinal).ToList()));
         return services;
     }
 
     /// <summary>
-    /// Maps enabled modules under <c>/api/v1</c>. In Development only, module endpoints allow anonymous access
-    /// until the Identity module (M1) supplies permissions; every other environment fails closed (spec 001).
+    /// Maps enabled modules under <c>/api/v1</c>. Every endpoint requires authentication in every environment
+    /// (spec 002 removed M0's Development-only anonymous access), and the suspended-institution guard is applied once
+    /// here so no module can forget it.
     /// </summary>
     public static WebApplication MapModules(this WebApplication app)
     {
-        var group = app.MapGroup(ApiPrefix);
-        if (app.Environment.IsDevelopment())
-        {
-            group.AllowAnonymous();
-        }
+        var group = app.MapGroup(ApiPrefix)
+            .RequireAuthorization()
+            .AddEndpointFilter<SuspendedInstitutionFilter>();
 
         foreach (var module in app.Services.GetServices<IModule>())
         {
@@ -50,3 +53,6 @@ internal static class ModuleRegistry
         return app;
     }
 }
+
+/// <summary>Module switches as read at start-up; /me and /api/version report them to the clients.</summary>
+internal sealed record EnabledModules(IReadOnlyList<string> Names) : IEnabledModules;

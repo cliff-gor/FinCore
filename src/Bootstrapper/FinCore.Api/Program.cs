@@ -8,8 +8,9 @@ using FinCore.Api.Platform;
 using FinCore.BuildingBlocks.Application;
 using FinCore.BuildingBlocks.Infrastructure;
 using FinCore.BuildingBlocks.Web;
+using FinCore.Modules.Identity.Infrastructure;
 using FinCore.Modules.Organization.Infrastructure;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using FinCore.BuildingBlocks.Web.Authorization;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -48,9 +49,8 @@ builder.Services
     .AddApplicationBuildingBlocks()
     .AddInfrastructureBuildingBlocks(builder.Configuration)
     .AddWebBuildingBlocks()
-    .AddModules(builder.Configuration, typeof(OrganizationModule).Assembly);
+    .AddModules(builder.Configuration, typeof(OrganizationModule).Assembly, typeof(IdentityModule).Assembly);
 
-builder.Services.AddScoped<DevSeeder>();
 builder.Services.AddHostedService<DatabaseInitializer>();
 
 builder.Services.AddHealthChecks()
@@ -59,24 +59,19 @@ builder.Services.AddHealthChecks()
         name: "postgres",
         tags: ["ready"]);
 
-// Authentication is wired but permissions come from Identity (M1); outside Development, module endpoints fail closed.
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(o =>
-    {
-        o.Authority = builder.Configuration["Auth:Authority"];
-        o.Audience = builder.Configuration["Auth:Audience"];
-        o.RequireHttpsMetadata = builder.Configuration.GetValue("Auth:RequireHttpsMetadata", true);
-        // Keep JWT claim names as issued ("sub", "permission"); the legacy mapping renames them to long SOAP URIs.
-        o.MapInboundClaims = false;
-    });
-builder.Services.AddAuthorization();
+// Staff and customer tokens come from two identity pools; permissions are added by the Identity module (spec 002).
+builder.Services.AddFinCoreAuthentication(builder.Configuration);
 
-builder.Services.AddOpenApi("organization", o => o.AddDocumentTransformer((document, _, _) =>
+// One OpenAPI document per module (spec §28); the build exports each to /openapi for the front-end client.
+foreach (var (document, title) in new[] { ("organization", "FinCore Organization API"), ("identity", "FinCore Identity API") })
 {
-    document.Info.Title = "FinCore Organization API";
-    document.Info.Version = BuildInfo.Product;
-    return Task.CompletedTask;
-}));
+    builder.Services.AddOpenApi(document, o => o.AddDocumentTransformer((doc, _, _) =>
+    {
+        doc.Info.Title = title;
+        doc.Info.Version = BuildInfo.Product;
+        return Task.CompletedTask;
+    }));
+}
 
 var app = builder.Build();
 

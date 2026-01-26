@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using FinCore.BuildingBlocks.Web.Security;
 using Serilog.Context;
 
 namespace FinCore.Api.Middleware;
@@ -24,6 +25,8 @@ internal sealed class CorrelationIdMiddleware(RequestDelegate next)
             return Task.CompletedTask;
         });
         Activity.Current?.SetTag("fincore.correlation_id", correlationId);
+        // Shared with the audit log through IRequestContext.
+        context.Items[HttpRequestContext.CorrelationIdItem] = correlationId;
 
         using (LogContext.PushProperty("CorrelationId", correlationId))
         {
