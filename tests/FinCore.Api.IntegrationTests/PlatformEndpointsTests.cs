@@ -13,7 +13,8 @@ public sealed class PlatformEndpointsTests(PostgresFixture postgres)
     public async Task Version_endpoint_reports_product_contract_and_module_schema() // AC-18
     {
         await using var factory = new FinCoreApiFactory(postgres);
-        using var client = factory.CreateClient();
+        // Every module endpoint needs a signed-in caller since spec 002.
+        using var client = await factory.CreatePlatformAdminClientAsync();
 
         var response = await client.GetAsync("/api/version", TestContext.Current.CancellationToken);
 
@@ -27,14 +28,16 @@ public sealed class PlatformEndpointsTests(PostgresFixture postgres)
         body.GetProperty("minimumMobileVersion").GetString().ShouldBe("0.1.0");
         var organization = body.GetProperty("modules").EnumerateArray().Single(m => m.GetProperty("name").GetString() == "Organization");
         organization.GetProperty("enabled").GetBoolean().ShouldBeTrue();
-        organization.GetProperty("schema").GetString()!.ShouldEndWith("_Initial");
+        // The latest applied migration id: a 14-digit timestamp and a name.
+        organization.GetProperty("schema").GetString()!.ShouldMatch(@"^\d{14}_\w+$");
     }
 
     [Fact]
     public async Task Correlation_id_is_echoed_and_version_header_is_on_errors_too() // AC-20, AC-18
     {
         await using var factory = new FinCoreApiFactory(postgres);
-        using var client = factory.CreateClient();
+        // Every module endpoint needs a signed-in caller since spec 002.
+        using var client = await factory.CreatePlatformAdminClientAsync();
         using var request = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/institutions/{Guid.NewGuid()}");
         request.Headers.Add("X-Correlation-Id", "abc");
 
@@ -49,7 +52,8 @@ public sealed class PlatformEndpointsTests(PostgresFixture postgres)
     public async Task Health_endpoints_report_healthy() // AC-12 (anonymous part)
     {
         await using var factory = new FinCoreApiFactory(postgres);
-        using var client = factory.CreateClient();
+        // Every module endpoint needs a signed-in caller since spec 002.
+        using var client = await factory.CreatePlatformAdminClientAsync();
 
         foreach (var path in new[] { "/health", "/health/live", "/health/ready" })
         {

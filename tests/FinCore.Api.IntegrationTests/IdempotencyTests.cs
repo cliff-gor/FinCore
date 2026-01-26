@@ -18,11 +18,8 @@ public sealed class IdempotencyTests(PostgresFixture postgres) : IAsyncLifetime
     private readonly FinCoreApiFactory _factory = new(postgres, configureServices: s => s.AddSingleton<IModule, TestModule>());
     private HttpClient _client = null!;
 
-    public ValueTask InitializeAsync()
-    {
-        _client = _factory.CreateClient();
-        return ValueTask.CompletedTask;
-    }
+    // The test endpoint lives in the module route group, which requires a signed-in caller (spec 002).
+    public async ValueTask InitializeAsync() => _client = await _factory.CreatePlatformAdminClientAsync();
 
     public async ValueTask DisposeAsync()
     {

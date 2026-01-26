@@ -20,13 +20,13 @@ public sealed class DevSeedTests(PostgresFixture postgres)
         // First start on an empty database.
         await using (var first = new FinCoreApiFactory(postgres, settings: settings))
         {
-            using var client = first.CreateClient();
+            using var client = await first.CreatePlatformAdminClientAsync();
             await AssertSeededAsync(first, client);
         }
 
         // Restart against the same database: the seeder must skip existing codes rather than fail or duplicate.
         await using var second = new FinCoreApiFactory(postgres, settings: settings);
-        using var secondClient = second.CreateClient();
+        using var secondClient = await second.CreatePlatformAdminClientAsync();
         await AssertSeededAsync(second, secondClient);
     }
 
