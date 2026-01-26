@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- Coverage gate (spec 001/002 NFR): >= 80 % line coverage on Identity.Domain. -->
+    <TestingPlatformCommandLineArguments>--coverlet --coverlet-include [FinCore.Modules.Identity.Domain]* --coverlet-threshold 80 --coverlet-threshold-type line --coverlet-threshold-stat Total --coverlet-file-prefix $(MSBuildProjectName) --coverlet-output-format cobertura</TestingPlatformCommandLineArguments>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Modules\Identity\FinCore.Modules.Identity.Application\FinCore.Modules.Identity.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="coverlet.MTP" />
+  </ItemGroup>
+</Project>
