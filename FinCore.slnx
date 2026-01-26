@@ -16,6 +16,13 @@
     <Project Path="src/Gateway/FinCore.Bff/FinCore.Bff.csproj" />
   </Folder>
   <Folder Name="/Modules/" />
+  <Folder Name="/Modules/Identity/">
+    <Project Path="src/Modules/Identity/FinCore.Modules.Identity.Application/FinCore.Modules.Identity.Application.csproj" />
+    <Project Path="src/Modules/Identity/FinCore.Modules.Identity.Contracts/FinCore.Modules.Identity.Contracts.csproj" />
+    <Project Path="src/Modules/Identity/FinCore.Modules.Identity.Domain/FinCore.Modules.Identity.Domain.csproj" />
+    <Project Path="src/Modules/Identity/FinCore.Modules.Identity.Infrastructure/FinCore.Modules.Identity.Infrastructure.csproj" />
+    <Project Path="src/Modules/Identity/FinCore.Modules.Identity.Presentation/FinCore.Modules.Identity.Presentation.csproj" />
+  </Folder>
   <Folder Name="/Modules/Organization/">
     <Project Path="src/Modules/Organization/FinCore.Modules.Organization.Application/FinCore.Modules.Organization.Application.csproj" />
     <Project Path="src/Modules/Organization/FinCore.Modules.Organization.Contracts/FinCore.Modules.Organization.Contracts.csproj" />
@@ -33,6 +40,10 @@
     <Project Path="tests/BuildingBlocks/FinCore.SharedKernel.UnitTests/FinCore.SharedKernel.UnitTests.csproj" />
   </Folder>
   <Folder Name="/Tests/Modules/" />
+  <Folder Name="/Tests/Modules/Identity/">
+    <Project Path="tests/Modules/Identity/FinCore.Modules.Identity.IntegrationTests/FinCore.Modules.Identity.IntegrationTests.csproj" />
+    <Project Path="tests/Modules/Identity/FinCore.Modules.Identity.UnitTests/FinCore.Modules.Identity.UnitTests.csproj" />
+  </Folder>
   <Folder Name="/Tests/Modules/Organization/">
     <Project Path="tests/Modules/Organization/FinCore.Modules.Organization.IntegrationTests/FinCore.Modules.Organization.IntegrationTests.csproj" />
     <Project Path="tests/Modules/Organization/FinCore.Modules.Organization.UnitTests/FinCore.Modules.Organization.UnitTests.csproj" />
