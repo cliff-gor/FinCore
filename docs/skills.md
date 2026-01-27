@@ -14,3 +14,8 @@ Discovery run for M0 on 2026-10-13 (read-only; nothing new installed).
 
 **Spec precedence reminders:** keep the custom `FloatingTabBar` and NativeWind even if Expo skills suggest native
 tabs or `@expo/ui`; keep Vite + AWS rather than Next.js/Vercel-specific guidance.
+
+## M1 discovery (2026-10-14)
+No change to the installed set. Used: `dotnet-claude-kit:spec` (spec 002), Expo skills for the mobile sign-in work
+(`expo-overview`, `expo-data-fetching`). Vercel web skills and `react-native-skills` remain recommended but not
+installed; spec 003 (design system and UI shells) is the point to decide on them.

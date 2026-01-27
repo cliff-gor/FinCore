@@ -21,6 +21,9 @@ with a React Back Office, a React Customer Portal and an Expo mobile app.
 
 ## Getting started
 Prerequisites: .NET 10 SDK, Node.js 22/24 with Corepack (`corepack enable`), Docker.
+The checkout path must not contain `#` (e.g. `C#-Projects`): the Vite dev server and Vitest break on it.
+Dev sign-in users and passwords are in [`docs/dev-accounts.md`](docs/dev-accounts.md); sign in through the BFF URLs
+(https://localhost:7200 Back Office, https://localhost:7201 Portal), which serve the web apps in Development.
 
 ```bash
 git config core.hooksPath .githooks          # once per clone: blocks AI attribution in commit messages
