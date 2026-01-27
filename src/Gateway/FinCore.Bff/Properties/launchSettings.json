@@ -6,7 +6,9 @@
       "applicationUrl": "https://localhost:7200",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "Bff__Mode": "BackOffice"
+        "Bff__Mode": "BackOffice",
+        "Bff__Oidc__ClientSecret": "fincore-backoffice-dev-only-secret",
+        "Bff__DevSpaUrl": "http://localhost:5173"
       }
     },
     "Portal": {
@@ -14,7 +16,9 @@
       "applicationUrl": "https://localhost:7201",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "Bff__Mode": "Portal"
+        "Bff__Mode": "Portal",
+        "Bff__Oidc__ClientSecret": "fincore-portal-dev-only-secret",
+        "Bff__DevSpaUrl": "http://localhost:5174"
       }
     },
     "Mobile": {

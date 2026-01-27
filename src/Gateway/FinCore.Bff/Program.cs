@@ -1,5 +1,7 @@
 using FinCore.Bff;
 using FinCore.Bff.Security;
+using FinCore.Bff.Sessions;
+using Yarp.ReverseProxy.Transforms;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +14,31 @@ builder.Configuration.AddCommandLine(args);
 
 builder.AddServiceDefaults();
 builder.Services.AddProblemDetails();
-builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+
+var proxy = builder.Services.AddReverseProxy().LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+if (mode.IsWeb())
+{
+    builder.AddBffSessions(mode);
+
+    proxy.AddTransforms(transforms =>
+    {
+        // The session cookie is the BFF's business only; the API (and its logs) never see the session id.
+        transforms.AddRequestHeaderRemove("Cookie");
+        if (string.Equals(transforms.Route.RouteId, DevSpaProxy.RouteId, StringComparison.Ordinal))
+        {
+            transforms.AddRequestTransform(ctx =>
+            {
+                ctx.HttpContext.Items[SecurityHeadersMiddleware.DevSpaResponseItem] = true;
+                return ValueTask.CompletedTask;
+            });
+        }
+    });
+
+    if (builder.Environment.IsDevelopment() && builder.Configuration["Bff:DevSpaUrl"] is { Length: > 0 } devSpaUrl)
+    {
+        proxy.AddDevSpaRoute(devSpaUrl);
+    }
+}
 
 var app = builder.Build();
 
@@ -23,7 +49,12 @@ app.UseMiddleware<SecurityHeadersMiddleware>();
 // check would only get in the way there (spec §30.3, §31.4).
 if (mode.IsWeb())
 {
+    // CSRF first: a forged request is refused before it costs a session lookup.
     app.UseMiddleware<CsrfHeaderMiddleware>();
+    // Also handles the OIDC callback (/signin-oidc).
+    app.UseAuthentication();
+    app.UseRateLimiter();
+    app.UseMiddleware<BffAccessTokenMiddleware>();
     app.MapBffEndpoints();
 }
 else

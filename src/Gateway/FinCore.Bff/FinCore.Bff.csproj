@@ -7,8 +7,15 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Aspire\FinCore.ServiceDefaults\FinCore.ServiceDefaults.csproj" />
+    <!-- Platform database only (BFF sessions + Data Protection keys); the gateway never runs migrations. -->
+    <ProjectReference Include="..\..\BuildingBlocks\FinCore.BuildingBlocks.Infrastructure\FinCore.BuildingBlocks.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Yarp.ReverseProxy" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="FinCore.Bff.Tests" />
   </ItemGroup>
 </Project>
