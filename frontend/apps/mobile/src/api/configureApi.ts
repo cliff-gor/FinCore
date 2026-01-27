@@ -32,14 +32,18 @@ export function appVersionHeader({ version, build }: AppVersionInfo): string {
   return `mobile/${version} (${build})`;
 }
 
-/** Bearer mode through the Mobile Gateway: no cookies or CSRF (spec §31.4). */
-// TODO(M1): pass the in-memory access-token getter from expo-auth-session sign-in.
-export function configureApi(getAccessToken: () => string | null = () => null): void {
+/**
+ * Bearer mode through the Mobile Gateway: no cookies or CSRF (spec §31.4). `getAccessToken` is the auth refresher's
+ * getter, which refreshes single-flight when the in-memory token is about to expire (spec 002 AC-5).
+ */
+export function configureApi(
+  getAccessToken: () => string | null | Promise<string | null> = () => null,
+): void {
   const info = getAppVersionInfo();
   configureHttp({
     baseUrl: getApiUrl(),
-    getAuthHeader: () => {
-      const token = getAccessToken();
+    getAuthHeader: async () => {
+      const token = await getAccessToken();
       return token === null ? undefined : `Bearer ${token}`;
     },
     // X-Client-Version is the cross-client header; X-App-Version adds the build number for the gateway's

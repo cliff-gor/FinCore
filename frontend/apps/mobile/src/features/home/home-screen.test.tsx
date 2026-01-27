@@ -11,6 +11,12 @@ jest.mock('@fincore/api-client', () => {
   return { ...actual, request: jest.fn() };
 });
 
+// Sign-in itself is covered by src/auth tests; here the user is signed out.
+jest.mock('@/auth/AuthProvider', () => ({
+  useAuth: () => ({ status: 'signed-out', error: null, signIn: jest.fn(), signOut: jest.fn() }),
+  fetchMe: jest.fn(),
+}));
+
 const mockRequest = jest.mocked(request);
 const i18n = createI18n({ lng: 'en', plugins: [initReactI18next] });
 
@@ -38,6 +44,7 @@ describe('HomeScreen', () => {
     expect(screen.getByText('Welcome to FinCore')).toBeTruthy();
     expect(await screen.findByText('● FinCore is online')).toBeTruthy();
     expect(mockRequest).toHaveBeenCalledWith('/health/live', expect.anything());
+    expect(screen.getByRole('button', { name: 'Sign in' })).toBeTruthy();
   });
 
   it('shows "update required" when the gateway answers 426', async () => {

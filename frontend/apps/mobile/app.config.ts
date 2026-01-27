@@ -26,7 +26,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   web: {
     bundler: 'metro',
   },
-  plugins: ['expo-router', 'expo-localization'],
+  plugins: ['expo-router', 'expo-localization', 'expo-secure-store', 'expo-web-browser'],
   experiments: {
     // Type-checks `href` strings against the files in app/.
     typedRoutes: true,
