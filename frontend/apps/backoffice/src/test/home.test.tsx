@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from '@tanstack/react-router';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { navigation } from '@fincore/auth';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { Providers } from '../app/providers.tsx';
 import { createQueryClient } from '../app/queryClient.ts';
 import { createAppRouter } from '../app/router.tsx';
@@ -25,15 +26,80 @@ describe('home', () => {
     expect(screen.getByTestId('app-footer').textContent).toMatch(/^v0\.1\.0 · \S+ · Development$/);
   });
 
-  it('shows the signed-in user when the BFF returns a session', async () => {
+  it('shows the signed-in user and kind when the BFF returns a session', async () => {
     server.use(
       http.get('*/bff/user', () =>
-        HttpResponse.json({ sub: '1', name: 'Amina', permissions: ['org.read'] }),
+        HttpResponse.json({
+          id: 'staff-1',
+          kind: 'staff',
+          name: 'Amina',
+          email: 'admin1.fcb@fincore.local',
+          institution: { id: 'i-1', code: 'FCB', name: 'FinCore Bank', status: 'Active' },
+          homeBranch: { id: 'b-1', code: '001', name: 'Head Office' },
+          roles: ['SystemAdmin'],
+          permissions: ['org.read'],
+          allBranches: true,
+          businessDate: '2026-10-14',
+          enabledModules: ['organization', 'identity'],
+        }),
       ),
     );
     renderApp();
 
-    expect(await screen.findByText('Signed in as Amina')).toBeDefined();
+    expect(await screen.findByText('Signed in as Amina (staff)')).toBeDefined();
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeDefined();
+  });
+
+  it('signs out through the BFF with the CSRF header and goes to the logout URL', async () => {
+    const assign = vi.spyOn(navigation, 'assign').mockImplementation(() => undefined);
+    const logoutHeaders: Headers[] = [];
+    server.use(
+      http.get('*/bff/user', () =>
+        HttpResponse.json({
+          id: 'staff-1',
+          kind: 'staff',
+          name: 'Amina',
+          email: 'admin1.fcb@fincore.local',
+          institution: { id: 'i-1', code: 'FCB', name: 'FinCore Bank', status: 'Active' },
+          homeBranch: { id: 'b-1', code: '001', name: 'Head Office' },
+          roles: ['SystemAdmin'],
+          permissions: ['org.read'],
+          allBranches: true,
+          businessDate: '2026-10-14',
+          enabledModules: ['organization', 'identity'],
+        }),
+      ),
+      http.post('*/bff/logout', ({ request }) => {
+        logoutHeaders.push(request.headers);
+        return HttpResponse.json({ logoutUrl: 'https://idp.test/logout?id_token_hint=x' });
+      }),
+    );
+    renderApp();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Sign out' }));
+
+    await waitFor(() =>
+      expect(assign).toHaveBeenCalledWith('https://idp.test/logout?id_token_hint=x'),
+    );
+    expect(logoutHeaders[0]?.get('X-CSRF')).toBe('1');
+    assign.mockRestore();
+  });
+
+  it('explains a refused sign-in instead of offering to sign in again', async () => {
+    server.use(
+      http.get('*/bff/user', () =>
+        HttpResponse.json(
+          { status: 403, title: 'Forbidden', code: 'Identity.StaffNotRegistered' },
+          { status: 403, headers: { 'Content-Type': 'application/problem+json' } },
+        ),
+      ),
+    );
+    renderApp();
+
+    expect((await screen.findByTestId('access-refused')).textContent).toContain(
+      'not registered in FinCore',
+    );
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeDefined();
   });
 
   it('sends X-CSRF and X-Client-Version on BFF calls', async () => {
