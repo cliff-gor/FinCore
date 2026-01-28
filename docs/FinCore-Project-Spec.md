@@ -3029,6 +3029,7 @@ A work package is done only when all of these hold:
 - [ ] Docs: ADR for any architectural decision; `docs/skills.md` updated if skills changed.
 - [ ] Comments follow §34.1: the *why* of business rules, money handling, concurrency and security is documented in the code; public/exported APIs have XML docs or TSDoc.
 - [ ] Commits follow §35.7 (owner identity, no AI attribution, readable messages); PR uses the template.
+- [ ] `HANDOFF.md` updated (current state, open items, decisions) per its update protocol.
 - [ ] Merged to `main` and deployed to Staging automatically; smoke test green and `/api/version` shows the new commit.
 
 ### 35.7 Commits & pull requests

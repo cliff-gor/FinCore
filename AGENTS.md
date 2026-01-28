@@ -1,5 +1,8 @@
 # FinCore — rules for coding agents
 
+**Start every session by reading [`HANDOFF.md`](HANDOFF.md)** — current state, next work package and rules — and
+update it before pushing any change (its "Update protocol" section).
+
 FinCore is a modular-monolith financial platform (.NET 10 / C# 14, React 19, Expo). The source of truth is
 [`docs/FinCore-Project-Spec.md`](docs/FinCore-Project-Spec.md) plus the approved milestone specs in
 [`docs/specs/`](docs/specs/). These rules come from master spec §35.1.
