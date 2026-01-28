@@ -15,7 +15,7 @@ internal sealed class InstitutionCreatedHandler(IInstitutionDirectory institutio
     public Task Handle(InstitutionCreatedIntegrationEvent e, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(e);
-        return institutions.UpsertAsync(e.InstitutionId, e.Code, "Active", e.BaseCurrency, cancellationToken);
+        return institutions.AddIfMissingAsync(e.InstitutionId, e.Code, e.BaseCurrency, e.OccurredOnUtc, cancellationToken);
     }
 }
 
@@ -29,9 +29,7 @@ internal sealed class InstitutionStatusChangedHandler(IInstitutionDirectory inst
     public async Task Handle(InstitutionStatusChangedIntegrationEvent e, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(e);
-        var current = await institutions.GetAsync(e.InstitutionId, cancellationToken).ConfigureAwait(false);
-        await institutions.UpsertAsync(e.InstitutionId, current?.Code ?? string.Empty, e.Status, current?.BaseCurrency ?? string.Empty, cancellationToken)
-            .ConfigureAwait(false);
+        await institutions.ApplyStatusAsync(e.InstitutionId, e.Status, e.OccurredOnUtc, cancellationToken).ConfigureAwait(false);
         await accessCache.InvalidateInstitutionAsync(e.InstitutionId, cancellationToken).ConfigureAwait(false);
     }
 }

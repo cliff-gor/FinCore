@@ -81,9 +81,16 @@ internal sealed class StaffAccessService(
         }
 
         var user = await staff.GetByEmailAsync(StaffUser.NormalizeEmail(email), cancellationToken).ConfigureAwait(false);
-        if (user is null || user.ExternalSubjectId is not null)
+        if (user is null)
         {
             return null;
+        }
+
+        // Already linked: either by a concurrent first request of this same sign-in (use it) or to a different IdP
+        // account (refuse — one staff user maps to exactly one sign-in identity).
+        if (user.ExternalSubjectId is not null)
+        {
+            return user.ExternalSubjectId == subject ? user : null;
         }
 
         var linked = user.LinkIdentity(subject, timeProvider.GetUtcNow().UtcDateTime);

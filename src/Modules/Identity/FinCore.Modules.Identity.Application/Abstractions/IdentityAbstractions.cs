@@ -43,8 +43,11 @@ public interface IInstitutionDirectory
 {
     Task<InstitutionSnapshot?> GetAsync(Guid institutionId, CancellationToken cancellationToken);
 
-    /// <summary>Creates or updates the local copy (called by the event handlers).</summary>
-    Task UpsertAsync(Guid institutionId, string code, string status, string baseCurrency, CancellationToken cancellationToken);
+    /// <summary>Records a new institution as Active; leaves an existing copy untouched (called on <c>InstitutionCreated</c>).</summary>
+    Task AddIfMissingAsync(Guid institutionId, string code, string baseCurrency, DateTime occurredOnUtc, CancellationToken cancellationToken);
+
+    /// <summary>Applies a status change unless the copy already reflects a later one (called on <c>InstitutionStatusChanged</c>).</summary>
+    Task ApplyStatusAsync(Guid institutionId, string status, DateTime occurredOnUtc, CancellationToken cancellationToken);
 }
 
 /// <summary>

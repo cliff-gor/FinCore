@@ -1,4 +1,5 @@
 using FinCore.BuildingBlocks.Application.Pagination;
+using FinCore.BuildingBlocks.Application.Persistence;
 using FinCore.Modules.Identity.Application.Abstractions;
 using FinCore.Modules.Identity.Application.Staff;
 using FinCore.Modules.Identity.Domain.Approvals;
@@ -93,52 +94,68 @@ internal sealed class IdentityQueries(IdentityDbContext dbContext) : IIdentityQu
             .ConfigureAwait(false);
 }
 
-internal sealed class InstitutionDirectory(IdentityDbContext dbContext, IOrganizationModuleApi organization, TimeProvider timeProvider)
-    : IInstitutionDirectory
+internal sealed class InstitutionDirectory(IdentityDbContext dbContext, IOrganizationModuleApi organization) : IInstitutionDirectory
 {
     public async Task<InstitutionSnapshot?> GetAsync(Guid institutionId, CancellationToken cancellationToken)
     {
-        var snapshot = await dbContext.Institutions.FirstOrDefaultAsync(i => i.Id == institutionId, cancellationToken).ConfigureAwait(false);
+        var snapshot = await FindAsync(institutionId, cancellationToken).ConfigureAwait(false);
         if (snapshot is not null)
         {
             return snapshot;
         }
 
         // The InstitutionCreated event may not have arrived yet (outbox polls every 2 s). A synchronous read through
-        // Organization's contract fills the gap once; afterwards the events keep the copy current.
+        // Organization's contract fills the gap once; afterwards the events keep the copy current. The read is stamped
+        // as "unknown" time so that any status event, even one that committed while this read ran, still applies.
         var org = await organization.GetInstitutionAsync(institutionId, cancellationToken).ConfigureAwait(false);
         if (org is null)
         {
             return null;
         }
 
-        await UpsertAsync(org.Id, org.Code, org.Status, org.BaseCurrency, cancellationToken).ConfigureAwait(false);
-        return await dbContext.Institutions.FirstAsync(i => i.Id == institutionId, cancellationToken).ConfigureAwait(false);
+        return await InsertOrLoadAsync(
+            new InstitutionSnapshot(org.Id, org.Code, org.Status, org.BaseCurrency, InstitutionSnapshot.UnknownAsOfUtc),
+            cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task UpsertAsync(Guid institutionId, string code, string status, string baseCurrency, CancellationToken cancellationToken)
+    public async Task AddIfMissingAsync(Guid institutionId, string code, string baseCurrency, DateTime occurredOnUtc, CancellationToken cancellationToken)
     {
-        var now = timeProvider.GetUtcNow().UtcDateTime;
-        var existing = await dbContext.Institutions.FirstOrDefaultAsync(i => i.Id == institutionId, cancellationToken).ConfigureAwait(false);
-        if (existing is null)
+        // Never overwrite: the copy may already hold a later status (filled by a read or a status event that won the race).
+        if (await FindAsync(institutionId, cancellationToken).ConfigureAwait(false) is null)
         {
-            var snapshot = new InstitutionSnapshot(institutionId, code, status, baseCurrency);
-            snapshot.ChangeStatus(status, now);
-            dbContext.Institutions.Add(snapshot);
+            await InsertOrLoadAsync(new InstitutionSnapshot(institutionId, code, "Active", baseCurrency, occurredOnUtc), cancellationToken)
+                .ConfigureAwait(false);
         }
-        else
+    }
+
+    public async Task ApplyStatusAsync(Guid institutionId, string status, DateTime occurredOnUtc, CancellationToken cancellationToken)
+    {
+        var snapshot = await GetAsync(institutionId, cancellationToken).ConfigureAwait(false);
+        if (snapshot is null || !snapshot.ApplyStatus(status, occurredOnUtc))
         {
-            existing.ChangeStatus(status, now);
+            return;
         }
 
+        await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private Task<InstitutionSnapshot?> FindAsync(Guid institutionId, CancellationToken cancellationToken) =>
+        dbContext.Institutions.FirstOrDefaultAsync(i => i.Id == institutionId, cancellationToken);
+
+    private async Task<InstitutionSnapshot> InsertOrLoadAsync(InstitutionSnapshot snapshot, CancellationToken cancellationToken)
+    {
+        dbContext.Institutions.Add(snapshot);
         try
         {
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            return snapshot;
         }
-        catch (FinCore.BuildingBlocks.Application.Persistence.UniqueConstraintViolationException)
+        catch (UniqueConstraintViolationException)
         {
-            // The event handler and the fallback read raced to insert the same institution; the other one won.
+            // An event handler and a request's fallback read raced to insert the same institution. Keep the winner's
+            // row: callers that carry a status change apply it on top, ordered by event time.
             dbContext.ChangeTracker.Clear();
+            return await dbContext.Institutions.FirstAsync(i => i.Id == snapshot.Id, cancellationToken).ConfigureAwait(false);
         }
     }
 }

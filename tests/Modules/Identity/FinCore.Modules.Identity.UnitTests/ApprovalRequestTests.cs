@@ -127,9 +127,9 @@ public sealed class ApprovalRequestTests
     [Fact]
     public void Institution_snapshot_tracks_status()
     {
-        var snapshot = new InstitutionSnapshot(Guid.CreateVersion7(), "FCB", "Active", "KES");
+        var snapshot = new InstitutionSnapshot(Guid.CreateVersion7(), "FCB", "Active", "KES", InstitutionSnapshot.UnknownAsOfUtc);
         snapshot.IsClosed.ShouldBeFalse();
-        snapshot.ChangeStatus("Closed", Now);
+        snapshot.ApplyStatus("Closed", Now).ShouldBeTrue();
         snapshot.IsClosed.ShouldBeTrue();
         snapshot.UpdatedAtUtc.ShouldBe(Now);
     }
