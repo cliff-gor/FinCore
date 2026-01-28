@@ -197,8 +197,10 @@ jobs:
       - name: Unit tests (Jest)
         run: pnpm --filter mobile test
 
+      # expo-doctor is not a project dependency; Expo ships it to be run on demand (npx/dlx).
       - name: expo-doctor
-        run: pnpm --filter mobile exec expo-doctor
+        working-directory: frontend/apps/mobile
+        run: pnpm dlx expo-doctor
 
   infra:
     name: infra (Terraform)

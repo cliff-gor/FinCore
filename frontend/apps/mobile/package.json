@@ -9,7 +9,7 @@
     "ios": "expo start --ios",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest --ci",
-    "doctor": "expo-doctor"
+    "doctor": "pnpm dlx expo-doctor"
   },
   "dependencies": {
     "@expo/metro-runtime": "~57.0.16",

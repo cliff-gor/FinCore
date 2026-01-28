@@ -18,11 +18,11 @@ _Last updated: 2026-10-14 · by: project owner_
 | Repository | https://github.com/cliff-gor/FinCore |
 | Default branch | `main` (M0 merged) |
 | Active branch | `wp/M1-platform-core` (spec 002 complete, pushed, **not yet merged**) |
-| Latest commit on active branch | `870c893 docs: record the authentication design and M1 setup notes` |
+| Latest commit on active branch | `5952ec3 fix(identity): close two races in first sign-in and the institution status copy` (followed by the CI/handoff commit — check `git log -1`) |
 | Milestone | **M1 — Platform core & design system**, split into spec 002 (done) and spec 003 (not started) |
 | Next work package | Write **spec 003: M1 design system & UI shells** (tokens, `packages/ui`, mobile UI kit, Back Office shell, admin & approval screens, Storybook / Design Gallery) |
 | Build | `dotnet build FinCore.slnx -warnaserror` green |
-| Tests | 194 .NET tests green; frontend lint / typecheck / build / Playwright green; mobile Jest + expo-doctor green |
+| Tests | 197 .NET tests green (locally on Postgres 16; awaiting a CI rerun on 17); frontend lint / typecheck / build / Playwright green; mobile Jest + expo-doctor green |
 
 ### Milestone status
 | Milestone | Spec | Status |
@@ -149,7 +149,8 @@ deliberate deviations. XML docs / TSDoc on public APIs. `TODO(M<n>)` must name t
 
 | Item | Status / next step |
 |---|---|
-| Merge `wp/M1-platform-core` into `main` | Owner to review and merge |
+| CI rerun after the race fixes | Owner to push and confirm the `dotnet` and `mobile` jobs are green |
+| Merge `wp/M1-platform-core` into `main` | Owner to review and merge once CI is green |
 | Spec 003 (design system & UI shells) | Not started — next work package |
 | Real Keycloak sign-in end to end | Not yet verified (image pulls failed on the last machine); realms are in `deploy/keycloak/` |
 | Full stack through Aspire | Not yet run end to end |
@@ -164,6 +165,7 @@ deliberate deviations. XML docs / TSDoc on public APIs. `TODO(M<n>)` must name t
 
 | Date | Decision | Where recorded |
 |---|---|---|
+| 2026-10-14 | `expo-doctor` runs on demand (`pnpm dlx`), not as a project dependency | `.github/workflows/ci.yml` |
 | 2026-10-14 | A PlatformAdmin's approval completes any request alone | spec 002, ADR-0005 |
 | 2026-10-14 | Bootstrap exception: PlatformAdmin registers an institution's first SystemAdmin directly | spec 002 |
 | 2026-10-14 | Integration tests use signed test tokens instead of Keycloak containers | spec 002 AC-23 |
