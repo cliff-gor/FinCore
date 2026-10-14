@@ -3,6 +3,7 @@ using FinCore.BuildingBlocks.Application.Pagination;
 using FinCore.BuildingBlocks.Web;
 using FinCore.BuildingBlocks.Web.Authorization;
 using FinCore.Modules.Organization.Application.Institutions;
+using FinCore.Modules.Organization.Application.Institutions.ChangeInstitutionStatus;
 using FinCore.Modules.Organization.Application.Institutions.CreateInstitution;
 using FinCore.Modules.Organization.Application.Institutions.GetBusinessDate;
 using FinCore.Modules.Organization.Application.Institutions.GetInstitution;
@@ -42,7 +43,8 @@ public static class InstitutionEndpoints
         group.MapPost("/", CreateAsync)
             .WithName("CreateInstitution")
             .WithSummary("Create a Bank or MFI institution")
-            .RequirePermission(Permissions.Organization.Manage)
+            // PlatformAdmin only (spec 002): institution admins manage their own institution, never create new ones.
+            .RequirePermission(Permissions.Platform.InstitutionsManage)
             .Produces<InstitutionResponse>(StatusCodes.Status201Created)
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status409Conflict);
@@ -61,11 +63,32 @@ public static class InstitutionEndpoints
             .Produces<InstitutionResponse>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
-        // Any signed-in user may read a business date (spec §12): every screen shows it, so no specific permission.
+        group.MapPost("/{id:guid}/suspend", (Guid id, IDispatcher d, CancellationToken ct) => ChangeStatusAsync(id, InstitutionStatusAction.Suspend, d, ct))
+            .WithName("SuspendInstitution")
+            .WithSummary("Suspend an institution: its staff can read but not change data")
+            .RequirePermission(Permissions.Platform.InstitutionsManage)
+            .Produces<InstitutionResponse>()
+            .ProducesProblem(StatusCodes.Status409Conflict);
+
+        group.MapPost("/{id:guid}/reactivate", (Guid id, IDispatcher d, CancellationToken ct) => ChangeStatusAsync(id, InstitutionStatusAction.Reactivate, d, ct))
+            .WithName("ReactivateInstitution")
+            .WithSummary("Lift an institution's suspension")
+            .RequirePermission(Permissions.Platform.InstitutionsManage)
+            .Produces<InstitutionResponse>()
+            .ProducesProblem(StatusCodes.Status409Conflict);
+
+        group.MapPost("/{id:guid}/close", (Guid id, IDispatcher d, CancellationToken ct) => ChangeStatusAsync(id, InstitutionStatusAction.Close, d, ct))
+            .WithName("CloseInstitution")
+            .WithSummary("Close an institution for good (all branches must be closed)")
+            .RequirePermission(Permissions.Platform.InstitutionsManage)
+            .Produces<InstitutionResponse>()
+            .ProducesProblem(StatusCodes.Status409Conflict);
+
+        // Any signed-in staff member may read their institution's business date (spec §12): every screen shows it.
         group.MapGet("/{id:guid}/business-date", GetBusinessDateAsync)
             .WithName("GetInstitutionBusinessDate")
             .WithSummary("Get an institution's current business date")
-            .RequireAuthorization()
+            .RequireStaff()
             .Produces<BusinessDateResponse>()
             .ProducesProblem(StatusCodes.Status404NotFound);
 
@@ -97,6 +120,12 @@ public static class InstitutionEndpoints
         Guid id, IDispatcher dispatcher, CancellationToken ct)
     {
         var result = await dispatcher.Send(new GetInstitutionQuery(id), ct).ConfigureAwait(false);
+        return result.IsSuccess ? TypedResults.Ok(result.Value) : result.ToProblem();
+    }
+
+    private static async Task<IResult> ChangeStatusAsync(Guid id, InstitutionStatusAction action, IDispatcher dispatcher, CancellationToken ct)
+    {
+        var result = await dispatcher.Send(new ChangeInstitutionStatusCommand(id, action), ct).ConfigureAwait(false);
         return result.IsSuccess ? TypedResults.Ok(result.Value) : result.ToProblem();
     }
 

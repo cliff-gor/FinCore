@@ -30,7 +30,11 @@ internal sealed class DatabaseInitializer(
 
         if (configuration.GetValue<bool>("Database:SeedDevData"))
         {
-            await scope.ServiceProvider.GetRequiredService<DevSeeder>().SeedAsync(cancellationToken).ConfigureAwait(false);
+            // Each module seeds its own data in order: Organization (institutions, branches) before Identity (staff).
+            foreach (var seeder in scope.ServiceProvider.GetServices<IDevSeeder>().OrderBy(s => s.Order))
+            {
+                await seeder.SeedAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 

@@ -1,0 +1,422 @@
+{
+  "realm": "fincore-staff",
+  "displayName": "FinCore Staff (DEV ONLY - local Keycloak)",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "verifyEmail": false,
+  "bruteForceProtected": true,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 0,
+  "clients": [
+    {
+      "clientId": "fincore-api",
+      "name": "FinCore API (staff)",
+      "description": "Resource server (token audience) only. Bearer-only: no login flows, no secret.",
+      "enabled": true,
+      "bearerOnly": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "frontchannelLogout": false
+    },
+    {
+      "clientId": "fincore-backoffice",
+      "name": "Back Office BFF",
+      "description": "Confidential client of the Back Office BFF (https://localhost:7200): Authorization Code + PKCE S256. The secret is DEV ONLY and must never be reused.",
+      "enabled": true,
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "fincore-backoffice-dev-only-secret",
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "https://localhost:7200",
+      "baseUrl": "/",
+      "redirectUris": [
+        "https://localhost:7200/signin-oidc"
+      ],
+      "webOrigins": [],
+      "frontchannelLogout": false,
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "https://localhost:7200/*",
+        "use.refresh.tokens": "true"
+      },
+      "protocolMappers": [
+        {
+          "name": "audience-fincore-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "fincore-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "introspection.token.claim": "true"
+          }
+        },
+        {
+          "name": "email",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "email",
+            "claim.name": "email",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        },
+        {
+          "name": "email verified",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "emailVerified",
+            "claim.name": "email_verified",
+            "jsonType.label": "boolean",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        },
+        {
+          "name": "full name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-full-name-mapper",
+          "consentRequired": false,
+          "config": {
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "platform.admin@fincore.local",
+      "email": "platform.admin@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Platform",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "admin1.fcb@fincore.local",
+      "email": "admin1.fcb@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin One",
+      "lastName": "FCB",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "admin2.fcb@fincore.local",
+      "email": "admin2.fcb@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin Two",
+      "lastName": "FCB",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "branch.officer.fcb@fincore.local",
+      "email": "branch.officer.fcb@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Branch Officer",
+      "lastName": "FCB",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "loan.officer.fcb@fincore.local",
+      "email": "loan.officer.fcb@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Loan Officer",
+      "lastName": "FCB",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "field.officer.fcb@fincore.local",
+      "email": "field.officer.fcb@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Field Officer",
+      "lastName": "FCB",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "credit.approver.fcb@fincore.local",
+      "email": "credit.approver.fcb@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Credit Approver",
+      "lastName": "FCB",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "compliance.fcb@fincore.local",
+      "email": "compliance.fcb@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Compliance Officer",
+      "lastName": "FCB",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "accountant.fcb@fincore.local",
+      "email": "accountant.fcb@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Accountant",
+      "lastName": "FCB",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "auditor.fcb@fincore.local",
+      "email": "auditor.fcb@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Auditor",
+      "lastName": "FCB",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "admin1.fcmfi@fincore.local",
+      "email": "admin1.fcmfi@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin One",
+      "lastName": "FCMFI",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "admin2.fcmfi@fincore.local",
+      "email": "admin2.fcmfi@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin Two",
+      "lastName": "FCMFI",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "branch.officer.fcmfi@fincore.local",
+      "email": "branch.officer.fcmfi@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Branch Officer",
+      "lastName": "FCMFI",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "loan.officer.fcmfi@fincore.local",
+      "email": "loan.officer.fcmfi@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Loan Officer",
+      "lastName": "FCMFI",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "field.officer.fcmfi@fincore.local",
+      "email": "field.officer.fcmfi@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Field Officer",
+      "lastName": "FCMFI",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "credit.approver.fcmfi@fincore.local",
+      "email": "credit.approver.fcmfi@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Credit Approver",
+      "lastName": "FCMFI",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "compliance.fcmfi@fincore.local",
+      "email": "compliance.fcmfi@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Compliance Officer",
+      "lastName": "FCMFI",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "accountant.fcmfi@fincore.local",
+      "email": "accountant.fcmfi@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Accountant",
+      "lastName": "FCMFI",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    },
+    {
+      "username": "auditor.fcmfi@fincore.local",
+      "email": "auditor.fcmfi@fincore.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Auditor",
+      "lastName": "FCMFI",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "FinCore-Dev-2026!",
+          "temporary": false
+        }
+      ],
+      "requiredActions": []
+    }
+  ]
+}

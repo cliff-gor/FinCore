@@ -15,7 +15,14 @@
     "signIn": "Sign in",
     "signOut": "Sign out",
     "signedInAs": "Signed in as {{name}}",
-    "unavailable": "We could not reach the sign-in service. Try again shortly."
+    "unavailable": "We could not reach the sign-in service. Try again shortly.",
+    "notRegistered": "Your sign-in worked, but this account is not registered in FinCore. Please contact your administrator.",
+    "emailNotVerified": "Your email address is not verified yet. Verify it, then sign in again.",
+    "inactive": "This account is no longer active. Please contact your administrator.",
+    "signedInAsKind": "Signed in as {{name}} ({{kind}})",
+    "kindStaff": "staff",
+    "kindCustomer": "customer",
+    "signOutFailed": "Signing out failed. Please try again."
   },
   "health": {
     "title": "Service status",

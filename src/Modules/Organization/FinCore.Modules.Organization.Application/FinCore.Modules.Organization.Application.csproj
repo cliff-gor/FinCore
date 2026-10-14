@@ -2,6 +2,8 @@
   <ItemGroup>
     <ProjectReference Include="..\FinCore.Modules.Organization.Domain\FinCore.Modules.Organization.Domain.csproj" />
     <ProjectReference Include="..\FinCore.Modules.Organization.Contracts\FinCore.Modules.Organization.Contracts.csproj" />
+    <!-- Read-only: asks Identity whether a branch still has active staff before closing it (spec 002). -->
+    <ProjectReference Include="..\..\Identity\FinCore.Modules.Identity.Contracts\FinCore.Modules.Identity.Contracts.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\FinCore.BuildingBlocks.Application\FinCore.BuildingBlocks.Application.csproj" />
   </ItemGroup>
   <ItemGroup>

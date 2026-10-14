@@ -16,7 +16,8 @@ public sealed class ConcurrencyTests(PostgresFixture postgres)
     public async Task Concurrent_update_of_an_aggregate_is_rejected_by_xmin()
     {
         await using var factory = new FinCoreApiFactory(postgres);
-        using var client = factory.CreateClient();
+        // Every module endpoint needs a signed-in caller since spec 002.
+        using var client = await factory.CreatePlatformAdminClientAsync();
         var created = (await (await client.CreateAsync(InstitutionApi.Request("XMIN1")))
             .Content.ReadFromJsonAsync<InstitutionDto>(InstitutionApi.Json, TestContext.Current.CancellationToken))!;
         var id = new InstitutionId(created.Id);
@@ -33,7 +34,8 @@ public sealed class ConcurrencyTests(PostgresFixture postgres)
         await dbA.SaveChangesAsync(ct);
 
         dbB.Entry(b).Property(i => i.Name).CurrentValue = "Second writer";
-        await Should.ThrowAsync<DbUpdateConcurrencyException>(() => dbB.SaveChangesAsync(ct));
+        // The module unit of work translates EF's exception so handlers can map it to a 409 without referencing EF.
+        await Should.ThrowAsync<FinCore.BuildingBlocks.Application.Persistence.ConcurrencyConflictException>(() => dbB.SaveChangesAsync(ct));
 
         var stored = await dbA.Institutions.AsNoTracking().SingleAsync(i => i.Id == id, ct);
         stored.ModifiedAtUtc.ShouldNotBeNull();

@@ -33,6 +33,51 @@ public static class OrganizationErrors
     public static readonly Error InstitutionCodeTaken = Error.Conflict(
         "Organization.InstitutionCodeTaken", "An institution with this code already exists.");
 
+    public static readonly Error InvalidBranchCode = ValidationError.For(
+        "code", $"Branch code must be exactly {Branches.BranchCode.Length} digits.");
+
+    public static readonly Error InvalidBranchName = ValidationError.For(
+        "name", $"Name must be {Branches.Branch.NameMinLength}–{Branches.Branch.NameMaxLength} characters.");
+
+    public static readonly Error InvalidBranchAddress = ValidationError.For(
+        "address", $"Address must be at most {Branches.Branch.AddressMaxLength} characters.");
+
+    public static readonly Error InvalidParentBranch = ValidationError.For(
+        "parentBranchId", "The parent must be an active top-level branch of the same institution.");
+
+    public static readonly Error InvalidWeekendDays = ValidationError.For(
+        "weekendDays", "Weekend days must be valid days and leave at least one working day.");
+
+    public static readonly Error PastHolidaysAreImmutable = ValidationError.For(
+        "holidays", "Holidays before the current business date cannot be changed.");
+
+    public static readonly Error InvalidHolidays = ValidationError.For(
+        "holidays", "Each holiday needs a name (max 100 characters) and dates must be unique.");
+
+    public static readonly Error BranchCodeTaken = Error.Conflict(
+        "Organization.BranchCodeTaken", "A branch with this code already exists in the institution.");
+
+    public static readonly Error BranchClosed = Error.Conflict(
+        "Organization.BranchClosed", "The branch is closed.");
+
+    public static readonly Error BranchHasActiveStaff = Error.Conflict(
+        "Organization.BranchHasActiveStaff", "Active staff still have this branch as their home branch.");
+
+    public static readonly Error BranchHasActiveChildren = Error.Conflict(
+        "Organization.BranchHasActiveChildren", "Close the branches that report to this branch first.");
+
+    public static readonly Error InstitutionHasActiveBranches = Error.Conflict(
+        "Organization.InstitutionHasActiveBranches", "Close all branches before closing the institution.");
+
+    public static readonly Error InstitutionAccessDenied = Error.Forbidden(
+        "Organization.InstitutionAccessDenied", "You can only work with your own institution.");
+
+    public static Error InvalidStatusTransition(InstitutionStatus from, InstitutionStatus to) => Error.Conflict(
+        "Organization.InvalidStatusTransition", $"An institution cannot move from {from} to {to}.");
+
+    public static Error BranchNotFound(Guid id) => Error.NotFound(
+        "Organization.BranchNotFound", $"Branch '{id}' was not found.");
+
     public static Error InstitutionNotFound(Guid id) => Error.NotFound(
         "Organization.InstitutionNotFound", $"Institution '{id}' was not found.");
 }

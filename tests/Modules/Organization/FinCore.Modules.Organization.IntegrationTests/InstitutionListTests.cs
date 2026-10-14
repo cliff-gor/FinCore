@@ -16,7 +16,7 @@ public sealed class InstitutionListTests(PostgresFixture postgres) : IAsyncLifet
 
     public async ValueTask InitializeAsync()
     {
-        _client = _factory.CreateClient();
+        _client = await _factory.CreatePlatformAdminClientAsync();
         foreach (var code in new[] { "CCC", "AAA", "BBB" })
         {
             (await _client.CreateAsync(InstitutionApi.Request(code))).StatusCode.ShouldBe(HttpStatusCode.Created);

@@ -1,5 +1,6 @@
 using FinCore.BuildingBlocks.Application.Messaging;
 using FinCore.BuildingBlocks.Application.Pagination;
+using FinCore.BuildingBlocks.Application.Security;
 using FinCore.Modules.Organization.Application.Abstractions;
 using FinCore.SharedKernel.Results;
 using FluentValidation;
@@ -20,12 +21,15 @@ internal sealed class ListInstitutionsQueryValidator : AbstractValidator<ListIns
     }
 }
 
-internal sealed class ListInstitutionsQueryHandler(IOrganizationQueries queries)
+internal sealed class ListInstitutionsQueryHandler(IOrganizationQueries queries, ICurrentUser currentUser)
     : IQueryHandler<ListInstitutionsQuery, PagedResult<InstitutionResponse>>
 {
     public async Task<Result<PagedResult<InstitutionResponse>>> Handle(ListInstitutionsQuery query, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(query);
-        return await queries.ListInstitutionsAsync(query.Page, query.PageSize, cancellationToken).ConfigureAwait(false);
+
+        // Institution isolation: staff see only their own institution; PlatformAdmin and system work see all.
+        var only = currentUser.IsPlatformAdmin || currentUser.Kind == UserKind.System ? (Guid?)null : currentUser.InstitutionId ?? Guid.Empty;
+        return await queries.ListInstitutionsAsync(only, query.Page, query.PageSize, cancellationToken).ConfigureAwait(false);
     }
 }

@@ -155,6 +155,132 @@
         }
       }
     },
+    "/api/v1/institutions/{id}/suspend": {
+      "post": {
+        "tags": [
+          "Institutions"
+        ],
+        "summary": "Suspend an institution: its staff can read but not change data",
+        "operationId": "SuspendInstitution",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/institutions/{id}/reactivate": {
+      "post": {
+        "tags": [
+          "Institutions"
+        ],
+        "summary": "Lift an institution's suspension",
+        "operationId": "ReactivateInstitution",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/institutions/{id}/close": {
+      "post": {
+        "tags": [
+          "Institutions"
+        ],
+        "summary": "Close an institution for good (all branches must be closed)",
+        "operationId": "CloseInstitution",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstitutionResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/institutions/{id}/business-date": {
       "get": {
         "tags": [
@@ -196,10 +322,462 @@
           }
         }
       }
+    },
+    "/api/v1/institutions/{institutionId}/branches": {
+      "post": {
+        "tags": [
+          "Branches"
+        ],
+        "summary": "Open a branch",
+        "operationId": "CreateBranch",
+        "parameters": [
+          {
+            "name": "institutionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBranchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BranchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Branches"
+        ],
+        "summary": "List branches (only the home branch without all-branch scope)",
+        "operationId": "ListBranches",
+        "parameters": [
+          {
+            "name": "institutionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 25
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResultOfBranchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/institutions/{institutionId}/branches/{branchId}": {
+      "get": {
+        "tags": [
+          "Branches"
+        ],
+        "summary": "Get a branch",
+        "operationId": "GetBranch",
+        "parameters": [
+          {
+            "name": "institutionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "branchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BranchResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Branches"
+        ],
+        "summary": "Change a branch's name, address or parent",
+        "operationId": "UpdateBranch",
+        "parameters": [
+          {
+            "name": "institutionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "branchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBranchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BranchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/institutions/{institutionId}/branches/{branchId}/close": {
+      "post": {
+        "tags": [
+          "Branches"
+        ],
+        "summary": "Close a branch (no active staff or child branches may remain)",
+        "operationId": "CloseBranch",
+        "parameters": [
+          {
+            "name": "institutionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "branchId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BranchResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/institutions/{institutionId}/holidays": {
+      "get": {
+        "tags": [
+          "Holidays"
+        ],
+        "summary": "Weekend days and holidays (optionally for one year)",
+        "operationId": "GetHolidayCalendar",
+        "parameters": [
+          {
+            "name": "institutionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HolidayCalendarResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Holidays"
+        ],
+        "summary": "Replace weekend days and future holidays; past holidays are immutable",
+        "operationId": "ReplaceHolidayCalendar",
+        "parameters": [
+          {
+            "name": "institutionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceHolidayCalendarRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HolidayCalendarResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "BranchResponse": {
+        "required": [
+          "id",
+          "institutionId",
+          "code",
+          "name",
+          "address",
+          "parentBranchId",
+          "status",
+          "createdAtUtc"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "institutionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "parentBranchId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "BusinessDateResponse": {
         "required": [
           "institutionId",
@@ -214,6 +792,36 @@
           "businessDate": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "CreateBranchRequest": {
+        "required": [
+          "code",
+          "name",
+          "address",
+          "parentBranchId"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "parentBranchId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         }
       },
@@ -249,6 +857,59 @@
           "initialBusinessDate": {
             "type": "string",
             "format": "date"
+          }
+        }
+      },
+      "DayOfWeek": {
+        "enum": [
+          "Sunday",
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ]
+      },
+      "HolidayCalendarResponse": {
+        "required": [
+          "institutionId",
+          "weekendDays",
+          "holidays"
+        ],
+        "type": "object",
+        "properties": {
+          "institutionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "weekendDays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayOfWeek"
+            }
+          },
+          "holidays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HolidayDto"
+            }
+          }
+        }
+      },
+      "HolidayDto": {
+        "required": [
+          "date",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "name": {
+            "type": "string"
           }
         }
       },
@@ -354,6 +1015,47 @@
           "Mfi"
         ]
       },
+      "PagedResultOfBranchResponse": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BranchResponse"
+            }
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "PagedResultOfInstitutionResponse": {
         "required": [
           "items",
@@ -432,12 +1134,65 @@
             ]
           }
         }
+      },
+      "ReplaceHolidayCalendarRequest": {
+        "required": [
+          "weekendDays",
+          "holidays"
+        ],
+        "type": "object",
+        "properties": {
+          "weekendDays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayOfWeek"
+            }
+          },
+          "holidays": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HolidayDto"
+            }
+          }
+        }
+      },
+      "UpdateBranchRequest": {
+        "required": [
+          "name",
+          "address",
+          "parentBranchId"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "parentBranchId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        }
       }
     }
   },
   "tags": [
     {
       "name": "Institutions"
+    },
+    {
+      "name": "Branches"
+    },
+    {
+      "name": "Holidays"
     }
   ]
 }

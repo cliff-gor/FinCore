@@ -843,7 +843,8 @@ Each module section lists: purpose, domain model, business rules, state machines
 
 | Method | Route | Permission |
 |---|---|---|
-| POST | `/institutions` | `org.manage` |
+| POST | `/institutions` | `platform.institutions.manage` (PlatformAdmin, spec 002) |
+| POST | `/institutions/{id}/suspend` · `/reactivate` · `/close` | `platform.institutions.manage` |
 | GET | `/institutions?page=&pageSize=` | `org.read` |
 | GET | `/institutions/{id}` | `org.read` |
 | POST | `/institutions/{id}/branches` | `org.manage` |
@@ -879,7 +880,8 @@ Each module section lists: purpose, domain model, business rules, state machines
 
 | Role | Typical permissions |
 |---|---|
-| `SystemAdmin` | org.manage, identity.manage, products.manage |
+| `PlatformAdmin` | platform.institutions.manage, identity.approve in any institution (fallback checker); not tied to an institution (spec 002) |
+| `SystemAdmin` | org.manage, identity.manage, identity.approve, products.manage |
 | `BranchOfficer` | customers.create, kyc.capture, accounts.open, accounts.transact |
 | `LoanOfficer` | loans.apply, loans.assess, loans.repay |
 | `FieldOfficer` | mfi.groups.manage, mfi.collections.record |
@@ -3027,6 +3029,7 @@ A work package is done only when all of these hold:
 - [ ] Docs: ADR for any architectural decision; `docs/skills.md` updated if skills changed.
 - [ ] Comments follow §34.1: the *why* of business rules, money handling, concurrency and security is documented in the code; public/exported APIs have XML docs or TSDoc.
 - [ ] Commits follow §35.7 (owner identity, no AI attribution, readable messages); PR uses the template.
+- [ ] `HANDOFF.md` updated (current state, open items, decisions) per its update protocol.
 - [ ] Merged to `main` and deployed to Staging automatically; smoke test green and `/api/version` shows the new commit.
 
 ### 35.7 Commits & pull requests

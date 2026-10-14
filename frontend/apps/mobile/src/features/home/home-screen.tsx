@@ -1,9 +1,13 @@
 import { HealthStatus } from '@/features/health/health-status';
+import { SessionPanel } from './session-panel';
 import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-/** M0 home: proves the app reaches the Mobile Gateway. Balances and quick actions arrive with later milestones. */
+/**
+ * Home: proves the app reaches the Mobile Gateway and that customer sign-in works (spec 002). Balances and quick
+ * actions arrive with later milestones.
+ */
 export function HomeScreen() {
   const { t } = useTranslation();
   return (
@@ -13,6 +17,7 @@ export function HomeScreen() {
           {t('home.title')}
         </Text>
         <HealthStatus />
+        <SessionPanel />
       </View>
     </SafeAreaView>
   );

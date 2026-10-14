@@ -120,7 +120,53 @@ public sealed class Institution : AggregateRoot<InstitutionId>
         return institution;
     }
 
-    /// <summary>Holiday calendars arrive in M1; until then only Saturday and Sunday are non-working days.</summary>
+    /// <summary>
+    /// Stops all staff writes while keeping data readable (spec 002). Only an Active institution can be suspended.
+    /// </summary>
+    public Result Suspend(DateTime utcNow) => ChangeStatus(InstitutionStatus.Active, InstitutionStatus.Suspended, utcNow);
+
+    /// <summary>Lifts a suspension.</summary>
+    public Result Reactivate(DateTime utcNow) => ChangeStatus(InstitutionStatus.Suspended, InstitutionStatus.Active, utcNow);
+
+    /// <summary>
+    /// Closes the institution for good. Its staff can no longer sign in, so every branch must be closed first —
+    /// otherwise customers would be left at branches nobody can operate (spec 002).
+    /// </summary>
+    public Result Close(bool hasActiveBranches, DateTime utcNow)
+    {
+        if (Status == InstitutionStatus.Closed)
+        {
+            return OrganizationErrors.InvalidStatusTransition(Status, InstitutionStatus.Closed);
+        }
+
+        if (hasActiveBranches)
+        {
+            return OrganizationErrors.InstitutionHasActiveBranches;
+        }
+
+        var previous = Status;
+        Status = InstitutionStatus.Closed;
+        Raise(new InstitutionStatusChangedDomainEvent(Guid.CreateVersion7(), utcNow, Id, previous, Status));
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Default weekend check, used when an institution is created and has no holiday calendar yet. Afterwards the
+    /// institution's own calendar decides (spec 002).
+    /// </summary>
     public static bool IsWeekend(DateOnly date) =>
         date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
+
+    private Result ChangeStatus(InstitutionStatus from, InstitutionStatus to, DateTime utcNow)
+    {
+        if (Status != from)
+        {
+            return OrganizationErrors.InvalidStatusTransition(Status, to);
+        }
+
+        Status = to;
+        // Identity keeps its own copy of the status (sign-in and write checks), so every change must be published.
+        Raise(new InstitutionStatusChangedDomainEvent(Guid.CreateVersion7(), utcNow, Id, from, to));
+        return Result.Success();
+    }
 }

@@ -14,6 +14,7 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         // Replace, not add: infrastructure registers a system-user fallback for hosts without HTTP (e.g. the Migrator).
         services.Replace(ServiceDescriptor.Scoped<ICurrentUser, HttpCurrentUser>());
+        services.AddScoped<IRequestContext, HttpRequestContext>();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
         services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
         return services;

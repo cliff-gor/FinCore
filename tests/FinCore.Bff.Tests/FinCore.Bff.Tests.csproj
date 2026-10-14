@@ -4,6 +4,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <!-- Only for the one ticket-store test against real Postgres; everything else uses in-memory fakes. -->
+    <PackageReference Include="Testcontainers.PostgreSql" />
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

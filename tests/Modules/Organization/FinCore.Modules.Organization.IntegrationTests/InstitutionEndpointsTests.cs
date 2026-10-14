@@ -11,11 +11,8 @@ public sealed class InstitutionEndpointsTests(PostgresFixture postgres) : IAsync
     private readonly FinCoreApiFactory _factory = new(postgres);
     private HttpClient _client = null!;
 
-    public ValueTask InitializeAsync()
-    {
-        _client = _factory.CreateClient();
-        return ValueTask.CompletedTask;
-    }
+    // Creating institutions is PlatformAdmin-only since spec 002.
+    public async ValueTask InitializeAsync() => _client = await _factory.CreatePlatformAdminClientAsync();
 
     public async ValueTask DisposeAsync()
     {

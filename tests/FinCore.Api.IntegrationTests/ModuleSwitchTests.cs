@@ -23,8 +23,12 @@ public sealed class ModuleSwitchTests(PostgresFixture postgres)
 
         (await client.GetAsync("/api/v1/institutions", ct)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
 
+        // Organization's own subscriber is gone; Identity (still enabled) keeps listening to Organization's events.
         using var scope = factory.Services.CreateScope();
-        scope.ServiceProvider.GetServices<IIntegrationEventHandler<InstitutionCreatedIntegrationEvent>>().ShouldBeEmpty();
+        var organizationSubscriber = Type.GetType(
+            "FinCore.Modules.Organization.Application.IntegrationEventHandlers.InstitutionCreatedLoggingHandler, FinCore.Modules.Organization.Application",
+            throwOnError: true)!;
+        scope.ServiceProvider.GetService(organizationSubscriber).ShouldBeNull();
 
         var version = await client.GetFromJsonAsync<JsonElement>("/api/version", ct);
         var organization = version.GetProperty("modules").EnumerateArray().Single(m => m.GetProperty("name").GetString() == "Organization");

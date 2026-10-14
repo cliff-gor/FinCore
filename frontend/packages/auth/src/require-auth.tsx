@@ -1,7 +1,7 @@
 import { Button } from '@fincore/ui';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { signIn, useSession } from './use-session.ts';
+import { signIn, signOut, useSession, type Session } from './use-session.ts';
 
 /** Props for `RequireAuth`. */
 export interface RequireAuthProps {
@@ -11,8 +11,9 @@ export interface RequireAuthProps {
 }
 
 /**
- * Renders children only for a signed-in user; otherwise a sign-in prompt. When the BFF is unreachable the prompt
- * says so instead of claiming the user is signed out.
+ * Renders children only for a signed-in user. Otherwise it explains why not: signed out (sign-in button), refused by
+ * FinCore although the identity provider accepted the user (not registered / inactive, with a sign-out button so
+ * another account can be used), or the BFF is unreachable.
  */
 export function RequireAuth({ children, fallback }: RequireAuthProps) {
   const { t } = useTranslation();
@@ -23,16 +24,38 @@ export function RequireAuth({ children, fallback }: RequireAuthProps) {
     return fallback ?? <p className="text-body text-text-muted">{t('session.checking')}</p>;
   }
 
+  const refused = session.status === 'not-registered' || session.status === 'inactive';
   return (
     <section
       aria-labelledby="signed-out-title"
       className="flex flex-col items-start gap-4 rounded-lg bg-surface p-6 shadow-e1"
-      data-testid="signed-out"
+      data-testid={refused ? 'access-refused' : 'signed-out'}
     >
       <p id="signed-out-title" className="text-body text-text">
-        {session.status === 'error' ? t('session.unavailable') : t('session.signedOut')}
+        {t(messageKey(session))}
       </p>
-      <Button onClick={() => signIn()}>{t('session.signIn')}</Button>
+      {refused ? (
+        <Button variant="secondary" onClick={() => void signOut()}>
+          {t('session.signOut')}
+        </Button>
+      ) : (
+        <Button onClick={() => signIn()}>{t('session.signIn')}</Button>
+      )}
     </section>
   );
+}
+
+function messageKey(session: Exclude<Session, { status: 'signed-in' | 'loading' }>): string {
+  switch (session.status) {
+    case 'not-registered':
+      return session.code === 'Identity.EmailNotVerified'
+        ? 'session.emailNotVerified'
+        : 'session.notRegistered';
+    case 'inactive':
+      return 'session.inactive';
+    case 'error':
+      return 'session.unavailable';
+    case 'signed-out':
+      return 'session.signedOut';
+  }
 }

@@ -21,13 +21,21 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  BranchResponse,
   BusinessDateResponse,
+  CreateBranchRequest,
   CreateInstitutionRequest,
+  GetHolidayCalendarParams,
+  HolidayCalendarResponse,
   HttpValidationProblemDetails,
   InstitutionResponse,
+  ListBranchesParams,
   ListInstitutionsParams,
+  PagedResultOfBranchResponse,
   PagedResultOfInstitutionResponse,
   ProblemDetails,
+  ReplaceHolidayCalendarRequest,
+  UpdateBranchRequest,
 } from './model';
 
 import { customFetch } from '../../http';
@@ -418,6 +426,261 @@ export function useGetInstitution<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+export const getSuspendInstitutionUrl = (id: string) => {
+  return `/api/v1/institutions/${id}/suspend`;
+};
+
+/**
+ * @summary Suspend an institution: its staff can read but not change data
+ */
+export const suspendInstitution = async (
+  id: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<InstitutionResponse> => {
+  return customFetch<InstitutionResponse>(getSuspendInstitutionUrl(id), {
+    ...options,
+    method: 'POST',
+  });
+};
+
+export const getSuspendInstitutionMutationKey = () => ['suspendInstitution'] as const;
+
+export const getSuspendInstitutionMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof suspendInstitution>>,
+    TError,
+    SuspendInstitutionMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof suspendInstitution>>,
+  TError,
+  SuspendInstitutionMutationVariables,
+  TContext
+> => {
+  const mutationKey = getSuspendInstitutionMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof suspendInstitution>>,
+    SuspendInstitutionMutationVariables
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return suspendInstitution(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SuspendInstitutionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof suspendInstitution>>
+>;
+
+export type SuspendInstitutionMutationError = ErrorType<ProblemDetails>;
+export type SuspendInstitutionMutationVariables = { id: string };
+
+/**
+ * @summary Suspend an institution: its staff can read but not change data
+ */
+export const useSuspendInstitution = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof suspendInstitution>>,
+      TError,
+      SuspendInstitutionMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof suspendInstitution>>,
+  TError,
+  SuspendInstitutionMutationVariables,
+  TContext
+> => {
+  return useMutation(getSuspendInstitutionMutationOptions(options), queryClient);
+};
+
+export const getReactivateInstitutionUrl = (id: string) => {
+  return `/api/v1/institutions/${id}/reactivate`;
+};
+
+/**
+ * @summary Lift an institution's suspension
+ */
+export const reactivateInstitution = async (
+  id: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<InstitutionResponse> => {
+  return customFetch<InstitutionResponse>(getReactivateInstitutionUrl(id), {
+    ...options,
+    method: 'POST',
+  });
+};
+
+export const getReactivateInstitutionMutationKey = () => ['reactivateInstitution'] as const;
+
+export const getReactivateInstitutionMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reactivateInstitution>>,
+    TError,
+    ReactivateInstitutionMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof reactivateInstitution>>,
+  TError,
+  ReactivateInstitutionMutationVariables,
+  TContext
+> => {
+  const mutationKey = getReactivateInstitutionMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof reactivateInstitution>>,
+    ReactivateInstitutionMutationVariables
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return reactivateInstitution(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReactivateInstitutionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof reactivateInstitution>>
+>;
+
+export type ReactivateInstitutionMutationError = ErrorType<ProblemDetails>;
+export type ReactivateInstitutionMutationVariables = { id: string };
+
+/**
+ * @summary Lift an institution's suspension
+ */
+export const useReactivateInstitution = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof reactivateInstitution>>,
+      TError,
+      ReactivateInstitutionMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof reactivateInstitution>>,
+  TError,
+  ReactivateInstitutionMutationVariables,
+  TContext
+> => {
+  return useMutation(getReactivateInstitutionMutationOptions(options), queryClient);
+};
+
+export const getCloseInstitutionUrl = (id: string) => {
+  return `/api/v1/institutions/${id}/close`;
+};
+
+/**
+ * @summary Close an institution for good (all branches must be closed)
+ */
+export const closeInstitution = async (
+  id: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<InstitutionResponse> => {
+  return customFetch<InstitutionResponse>(getCloseInstitutionUrl(id), {
+    ...options,
+    method: 'POST',
+  });
+};
+
+export const getCloseInstitutionMutationKey = () => ['closeInstitution'] as const;
+
+export const getCloseInstitutionMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof closeInstitution>>,
+    TError,
+    CloseInstitutionMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof closeInstitution>>,
+  TError,
+  CloseInstitutionMutationVariables,
+  TContext
+> => {
+  const mutationKey = getCloseInstitutionMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof closeInstitution>>,
+    CloseInstitutionMutationVariables
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return closeInstitution(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CloseInstitutionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof closeInstitution>>
+>;
+
+export type CloseInstitutionMutationError = ErrorType<ProblemDetails>;
+export type CloseInstitutionMutationVariables = { id: string };
+
+/**
+ * @summary Close an institution for good (all branches must be closed)
+ */
+export const useCloseInstitution = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof closeInstitution>>,
+      TError,
+      CloseInstitutionMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof closeInstitution>>,
+  TError,
+  CloseInstitutionMutationVariables,
+  TContext
+> => {
+  return useMutation(getCloseInstitutionMutationOptions(options), queryClient);
+};
+
 export const getGetInstitutionBusinessDateUrl = (id: string) => {
   return `/api/v1/institutions/${id}/business-date`;
 };
@@ -554,3 +817,849 @@ export function useGetInstitutionBusinessDate<
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+export const getCreateBranchUrl = (institutionId: string) => {
+  return `/api/v1/institutions/${institutionId}/branches`;
+};
+
+/**
+ * @summary Open a branch
+ */
+export const createBranch = async (
+  institutionId: string,
+  createBranchRequest: CreateBranchRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<BranchResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit['headers']>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  return customFetch<BranchResponse>(getCreateBranchUrl(institutionId), {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(createBranchRequest),
+  });
+};
+
+export const getCreateBranchMutationKey = () => ['createBranch'] as const;
+
+export const getCreateBranchMutationOptions = <
+  TError = ErrorType<HttpValidationProblemDetails | ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createBranch>>,
+    TError,
+    CreateBranchMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createBranch>>,
+  TError,
+  CreateBranchMutationVariables,
+  TContext
+> => {
+  const mutationKey = getCreateBranchMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createBranch>>,
+    CreateBranchMutationVariables
+  > = (props) => {
+    const { institutionId, data } = props ?? {};
+
+    return createBranch(institutionId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateBranchMutationResult = NonNullable<Awaited<ReturnType<typeof createBranch>>>;
+export type CreateBranchMutationBody = CreateBranchRequest;
+export type CreateBranchMutationError = ErrorType<HttpValidationProblemDetails | ProblemDetails>;
+export type CreateBranchMutationVariables = { institutionId: string; data: CreateBranchRequest };
+
+/**
+ * @summary Open a branch
+ */
+export const useCreateBranch = <
+  TError = ErrorType<HttpValidationProblemDetails | ProblemDetails>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createBranch>>,
+      TError,
+      CreateBranchMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createBranch>>,
+  TError,
+  CreateBranchMutationVariables,
+  TContext
+> => {
+  return useMutation(getCreateBranchMutationOptions(options), queryClient);
+};
+
+export const getListBranchesUrl = (institutionId: string, params?: ListBranchesParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/institutions/${institutionId}/branches?${stringifiedParams}`
+    : `/api/v1/institutions/${institutionId}/branches`;
+};
+
+/**
+ * @summary List branches (only the home branch without all-branch scope)
+ */
+export const listBranches = async (
+  institutionId: string,
+  params?: ListBranchesParams,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<PagedResultOfBranchResponse> => {
+  return customFetch<PagedResultOfBranchResponse>(getListBranchesUrl(institutionId, params), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getListBranchesQueryKey = (institutionId: string, params?: ListBranchesParams) => {
+  return [`/api/v1/institutions/${institutionId}/branches`, ...(params ? [params] : [])] as const;
+};
+
+export const getListBranchesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listBranches>>,
+  TError = ErrorType<HttpValidationProblemDetails>,
+>(
+  institutionId: string,
+  params?: ListBranchesParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listBranches>>, TError, TData>>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListBranchesQueryKey(institutionId, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listBranches>>> = ({ signal }) =>
+    listBranches(institutionId, params, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: institutionId !== null && institutionId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof listBranches>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type ListBranchesQueryResult = NonNullable<Awaited<ReturnType<typeof listBranches>>>;
+export type ListBranchesQueryError = ErrorType<HttpValidationProblemDetails>;
+
+export function useListBranches<
+  TData = Awaited<ReturnType<typeof listBranches>>,
+  TError = ErrorType<HttpValidationProblemDetails>,
+>(
+  institutionId: string,
+  params: undefined | ListBranchesParams,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof listBranches>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listBranches>>,
+          TError,
+          Awaited<ReturnType<typeof listBranches>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListBranches<
+  TData = Awaited<ReturnType<typeof listBranches>>,
+  TError = ErrorType<HttpValidationProblemDetails>,
+>(
+  institutionId: string,
+  params?: ListBranchesParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listBranches>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listBranches>>,
+          TError,
+          Awaited<ReturnType<typeof listBranches>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useListBranches<
+  TData = Awaited<ReturnType<typeof listBranches>>,
+  TError = ErrorType<HttpValidationProblemDetails>,
+>(
+  institutionId: string,
+  params?: ListBranchesParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listBranches>>, TError, TData>>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary List branches (only the home branch without all-branch scope)
+ */
+
+export function useListBranches<
+  TData = Awaited<ReturnType<typeof listBranches>>,
+  TError = ErrorType<HttpValidationProblemDetails>,
+>(
+  institutionId: string,
+  params?: ListBranchesParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listBranches>>, TError, TData>>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListBranchesQueryOptions(institutionId, params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getGetBranchUrl = (institutionId: string, branchId: string) => {
+  return `/api/v1/institutions/${institutionId}/branches/${branchId}`;
+};
+
+/**
+ * @summary Get a branch
+ */
+export const getBranch = async (
+  institutionId: string,
+  branchId: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<BranchResponse> => {
+  return customFetch<BranchResponse>(getGetBranchUrl(institutionId, branchId), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetBranchQueryKey = (institutionId: string, branchId: string) => {
+  return [`/api/v1/institutions/${institutionId}/branches/${branchId}`] as const;
+};
+
+export const getGetBranchQueryOptions = <
+  TData = Awaited<ReturnType<typeof getBranch>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  institutionId: string,
+  branchId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getBranch>>, TError, TData>>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetBranchQueryKey(institutionId, branchId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getBranch>>> = ({ signal }) =>
+    getBranch(institutionId, branchId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled:
+      institutionId !== null &&
+      institutionId !== undefined &&
+      branchId !== null &&
+      branchId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getBranch>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetBranchQueryResult = NonNullable<Awaited<ReturnType<typeof getBranch>>>;
+export type GetBranchQueryError = ErrorType<ProblemDetails>;
+
+export function useGetBranch<
+  TData = Awaited<ReturnType<typeof getBranch>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  institutionId: string,
+  branchId: string,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getBranch>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBranch>>,
+          TError,
+          Awaited<ReturnType<typeof getBranch>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetBranch<
+  TData = Awaited<ReturnType<typeof getBranch>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  institutionId: string,
+  branchId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getBranch>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBranch>>,
+          TError,
+          Awaited<ReturnType<typeof getBranch>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetBranch<
+  TData = Awaited<ReturnType<typeof getBranch>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  institutionId: string,
+  branchId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getBranch>>, TError, TData>>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Get a branch
+ */
+
+export function useGetBranch<
+  TData = Awaited<ReturnType<typeof getBranch>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  institutionId: string,
+  branchId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getBranch>>, TError, TData>>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetBranchQueryOptions(institutionId, branchId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getUpdateBranchUrl = (institutionId: string, branchId: string) => {
+  return `/api/v1/institutions/${institutionId}/branches/${branchId}`;
+};
+
+/**
+ * @summary Change a branch's name, address or parent
+ */
+export const updateBranch = async (
+  institutionId: string,
+  branchId: string,
+  updateBranchRequest: UpdateBranchRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<BranchResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit['headers']>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  return customFetch<BranchResponse>(getUpdateBranchUrl(institutionId, branchId), {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(updateBranchRequest),
+  });
+};
+
+export const getUpdateBranchMutationKey = () => ['updateBranch'] as const;
+
+export const getUpdateBranchMutationOptions = <
+  TError = ErrorType<HttpValidationProblemDetails | ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateBranch>>,
+    TError,
+    UpdateBranchMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateBranch>>,
+  TError,
+  UpdateBranchMutationVariables,
+  TContext
+> => {
+  const mutationKey = getUpdateBranchMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateBranch>>,
+    UpdateBranchMutationVariables
+  > = (props) => {
+    const { institutionId, branchId, data } = props ?? {};
+
+    return updateBranch(institutionId, branchId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateBranchMutationResult = NonNullable<Awaited<ReturnType<typeof updateBranch>>>;
+export type UpdateBranchMutationBody = UpdateBranchRequest;
+export type UpdateBranchMutationError = ErrorType<HttpValidationProblemDetails | ProblemDetails>;
+export type UpdateBranchMutationVariables = {
+  institutionId: string;
+  branchId: string;
+  data: UpdateBranchRequest;
+};
+
+/**
+ * @summary Change a branch's name, address or parent
+ */
+export const useUpdateBranch = <
+  TError = ErrorType<HttpValidationProblemDetails | ProblemDetails>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateBranch>>,
+      TError,
+      UpdateBranchMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateBranch>>,
+  TError,
+  UpdateBranchMutationVariables,
+  TContext
+> => {
+  return useMutation(getUpdateBranchMutationOptions(options), queryClient);
+};
+
+export const getCloseBranchUrl = (institutionId: string, branchId: string) => {
+  return `/api/v1/institutions/${institutionId}/branches/${branchId}/close`;
+};
+
+/**
+ * @summary Close a branch (no active staff or child branches may remain)
+ */
+export const closeBranch = async (
+  institutionId: string,
+  branchId: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<BranchResponse> => {
+  return customFetch<BranchResponse>(getCloseBranchUrl(institutionId, branchId), {
+    ...options,
+    method: 'POST',
+  });
+};
+
+export const getCloseBranchMutationKey = () => ['closeBranch'] as const;
+
+export const getCloseBranchMutationOptions = <
+  TError = ErrorType<ProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof closeBranch>>,
+    TError,
+    CloseBranchMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof closeBranch>>,
+  TError,
+  CloseBranchMutationVariables,
+  TContext
+> => {
+  const mutationKey = getCloseBranchMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof closeBranch>>,
+    CloseBranchMutationVariables
+  > = (props) => {
+    const { institutionId, branchId } = props ?? {};
+
+    return closeBranch(institutionId, branchId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CloseBranchMutationResult = NonNullable<Awaited<ReturnType<typeof closeBranch>>>;
+
+export type CloseBranchMutationError = ErrorType<ProblemDetails>;
+export type CloseBranchMutationVariables = { institutionId: string; branchId: string };
+
+/**
+ * @summary Close a branch (no active staff or child branches may remain)
+ */
+export const useCloseBranch = <TError = ErrorType<ProblemDetails>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof closeBranch>>,
+      TError,
+      CloseBranchMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof closeBranch>>,
+  TError,
+  CloseBranchMutationVariables,
+  TContext
+> => {
+  return useMutation(getCloseBranchMutationOptions(options), queryClient);
+};
+
+export const getGetHolidayCalendarUrl = (
+  institutionId: string,
+  params?: GetHolidayCalendarParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/institutions/${institutionId}/holidays?${stringifiedParams}`
+    : `/api/v1/institutions/${institutionId}/holidays`;
+};
+
+/**
+ * @summary Weekend days and holidays (optionally for one year)
+ */
+export const getHolidayCalendar = async (
+  institutionId: string,
+  params?: GetHolidayCalendarParams,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<HolidayCalendarResponse> => {
+  return customFetch<HolidayCalendarResponse>(getGetHolidayCalendarUrl(institutionId, params), {
+    ...options,
+    method: 'GET',
+  });
+};
+
+export const getGetHolidayCalendarQueryKey = (
+  institutionId: string,
+  params?: GetHolidayCalendarParams,
+) => {
+  return [`/api/v1/institutions/${institutionId}/holidays`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetHolidayCalendarQueryOptions = <
+  TData = Awaited<ReturnType<typeof getHolidayCalendar>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  institutionId: string,
+  params?: GetHolidayCalendarParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getHolidayCalendar>>, TError, TData>>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetHolidayCalendarQueryKey(institutionId, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getHolidayCalendar>>> = ({ signal }) =>
+    getHolidayCalendar(institutionId, params, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: institutionId !== null && institutionId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getHolidayCalendar>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetHolidayCalendarQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getHolidayCalendar>>
+>;
+export type GetHolidayCalendarQueryError = ErrorType<ProblemDetails>;
+
+export function useGetHolidayCalendar<
+  TData = Awaited<ReturnType<typeof getHolidayCalendar>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  institutionId: string,
+  params: undefined | GetHolidayCalendarParams,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getHolidayCalendar>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getHolidayCalendar>>,
+          TError,
+          Awaited<ReturnType<typeof getHolidayCalendar>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetHolidayCalendar<
+  TData = Awaited<ReturnType<typeof getHolidayCalendar>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  institutionId: string,
+  params?: GetHolidayCalendarParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getHolidayCalendar>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getHolidayCalendar>>,
+          TError,
+          Awaited<ReturnType<typeof getHolidayCalendar>>
+        >,
+        'initialData'
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+export function useGetHolidayCalendar<
+  TData = Awaited<ReturnType<typeof getHolidayCalendar>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  institutionId: string,
+  params?: GetHolidayCalendarParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getHolidayCalendar>>, TError, TData>>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * @summary Weekend days and holidays (optionally for one year)
+ */
+
+export function useGetHolidayCalendar<
+  TData = Awaited<ReturnType<typeof getHolidayCalendar>>,
+  TError = ErrorType<ProblemDetails>,
+>(
+  institutionId: string,
+  params?: GetHolidayCalendarParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getHolidayCalendar>>, TError, TData>>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetHolidayCalendarQueryOptions(institutionId, params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getReplaceHolidayCalendarUrl = (institutionId: string) => {
+  return `/api/v1/institutions/${institutionId}/holidays`;
+};
+
+/**
+ * @summary Replace weekend days and future holidays; past holidays are immutable
+ */
+export const replaceHolidayCalendar = async (
+  institutionId: string,
+  replaceHolidayCalendarRequest: ReplaceHolidayCalendarRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<HolidayCalendarResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit['headers']>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  return customFetch<HolidayCalendarResponse>(getReplaceHolidayCalendarUrl(institutionId), {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(replaceHolidayCalendarRequest),
+  });
+};
+
+export const getReplaceHolidayCalendarMutationKey = () => ['replaceHolidayCalendar'] as const;
+
+export const getReplaceHolidayCalendarMutationOptions = <
+  TError = ErrorType<HttpValidationProblemDetails>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof replaceHolidayCalendar>>,
+    TError,
+    ReplaceHolidayCalendarMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof replaceHolidayCalendar>>,
+  TError,
+  ReplaceHolidayCalendarMutationVariables,
+  TContext
+> => {
+  const mutationKey = getReplaceHolidayCalendarMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof replaceHolidayCalendar>>,
+    ReplaceHolidayCalendarMutationVariables
+  > = (props) => {
+    const { institutionId, data } = props ?? {};
+
+    return replaceHolidayCalendar(institutionId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReplaceHolidayCalendarMutationResult = NonNullable<
+  Awaited<ReturnType<typeof replaceHolidayCalendar>>
+>;
+export type ReplaceHolidayCalendarMutationBody = ReplaceHolidayCalendarRequest;
+export type ReplaceHolidayCalendarMutationError = ErrorType<HttpValidationProblemDetails>;
+export type ReplaceHolidayCalendarMutationVariables = {
+  institutionId: string;
+  data: ReplaceHolidayCalendarRequest;
+};
+
+/**
+ * @summary Replace weekend days and future holidays; past holidays are immutable
+ */
+export const useReplaceHolidayCalendar = <
+  TError = ErrorType<HttpValidationProblemDetails>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof replaceHolidayCalendar>>,
+      TError,
+      ReplaceHolidayCalendarMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof replaceHolidayCalendar>>,
+  TError,
+  ReplaceHolidayCalendarMutationVariables,
+  TContext
+> => {
+  return useMutation(getReplaceHolidayCalendarMutationOptions(options), queryClient);
+};

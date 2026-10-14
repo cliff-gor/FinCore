@@ -5,12 +5,22 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './branchResponse';
 export * from './businessDateResponse';
+export * from './createBranchRequest';
 export * from './createInstitutionRequest';
+export * from './dayOfWeek';
+export * from './getHolidayCalendarParams';
+export * from './holidayCalendarResponse';
+export * from './holidayDto';
 export * from './httpValidationProblemDetails';
 export * from './httpValidationProblemDetailsErrors';
 export * from './institutionResponse';
 export * from './institutionType';
+export * from './listBranchesParams';
 export * from './listInstitutionsParams';
+export * from './pagedResultOfBranchResponse';
 export * from './pagedResultOfInstitutionResponse';
 export * from './problemDetails';
+export * from './replaceHolidayCalendarRequest';
+export * from './updateBranchRequest';

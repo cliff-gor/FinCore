@@ -20,7 +20,8 @@ public sealed class OutboxPipelineTests(PostgresFixture postgres)
     public async Task Created_institution_flows_outbox_to_bus_to_inbox() // AC-14
     {
         await using var factory = new FinCoreApiFactory(postgres);
-        using var client = factory.CreateClient();
+        // Every module endpoint needs a signed-in caller since spec 002.
+        using var client = await factory.CreatePlatformAdminClientAsync();
         var institutionId = await client.CreateInstitutionAsync("OBX1");
         var ct = TestContext.Current.CancellationToken;
 
@@ -51,7 +52,8 @@ public sealed class OutboxPipelineTests(PostgresFixture postgres)
     {
         await using var factory = new FinCoreApiFactory(postgres, configureServices: services =>
             services.AddIntegrationEventHandler<InstitutionCreatedIntegrationEvent, CountingHandler, OrganizationDbContext>());
-        using var client = factory.CreateClient();
+        // Every module endpoint needs a signed-in caller since spec 002.
+        using var client = await factory.CreatePlatformAdminClientAsync();
         var bus = factory.Services.GetRequiredService<IEventBus>();
         var evt = new InstitutionCreatedIntegrationEvent(
             Guid.CreateVersion7(), DateTime.UtcNow, Guid.CreateVersion7(), "DUPE", "Dupe", "Bank", "KES", new DateOnly(2026, 10, 14));
@@ -68,7 +70,8 @@ public sealed class OutboxPipelineTests(PostgresFixture postgres)
     {
         await using var factory = new FinCoreApiFactory(postgres, configureServices: services =>
             services.AddIntegrationEventHandler<InstitutionCreatedIntegrationEvent, FailingHandler, OrganizationDbContext>());
-        using var client = factory.CreateClient();
+        // Every module endpoint needs a signed-in caller since spec 002.
+        using var client = await factory.CreatePlatformAdminClientAsync();
         var institutionId = await client.CreateInstitutionAsync("DEAD1");
         var ct = TestContext.Current.CancellationToken;
 

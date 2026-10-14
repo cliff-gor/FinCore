@@ -2,6 +2,7 @@ using FinCore.BuildingBlocks.Application;
 using FinCore.BuildingBlocks.Infrastructure;
 using FinCore.BuildingBlocks.Infrastructure.Persistence;
 using FinCore.BuildingBlocks.Web;
+using FinCore.Modules.Identity.Infrastructure;
 using FinCore.Modules.Organization.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,8 +18,8 @@ builder.Services
     .AddApplicationBuildingBlocks()
     .AddInfrastructureBuildingBlocks(builder.Configuration);
 
-// TODO(M1): list each new module here as it lands; the order in which modules migrate comes from their MigrationOrder.
-IModule[] modules = [new OrganizationModule()];
+// TODO(M2): add each new module here as it lands; the order in which modules migrate comes from their MigrationOrder.
+IModule[] modules = [new OrganizationModule(), new IdentityModule()];
 foreach (var module in modules)
 {
     module.AddModule(builder.Services, builder.Configuration);

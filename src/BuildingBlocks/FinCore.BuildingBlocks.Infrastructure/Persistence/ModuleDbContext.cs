@@ -30,6 +30,11 @@ public abstract class ModuleDbContext(DbContextOptions options) : DbContext(opti
         }
         // Translate the provider-specific error into an application-level exception, so handlers can turn a lost
         // race into a Conflict result without referencing Npgsql.
+        catch (DbUpdateConcurrencyException ex)
+        {
+            // Someone else changed the aggregate since it was loaded (xmin mismatch); let the handler map it to a 409.
+            throw new ConcurrencyConflictException("The data was changed by another request.", ex);
+        }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation } pg)
         {
             throw UniqueConstraintViolationException.For(pg.ConstraintName, ex);

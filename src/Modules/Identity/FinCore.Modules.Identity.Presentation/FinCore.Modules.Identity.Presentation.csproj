@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\FinCore.Modules.Identity.Application\FinCore.Modules.Identity.Application.csproj" />
+    <ProjectReference Include="..\..\..\BuildingBlocks\FinCore.BuildingBlocks.Web\FinCore.BuildingBlocks.Web.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+</Project>

@@ -18,7 +18,7 @@ namespace FinCore.Modules.Organization.Infrastructure.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("org")
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -99,6 +99,125 @@ namespace FinCore.Modules.Organization.Infrastructure.Persistence.Migrations
                         .HasFilter("processed_on_utc IS NULL AND dead_lettered_on_utc IS NULL");
 
                     b.ToTable("outbox_messages", "org");
+                });
+
+            modelBuilder.Entity("FinCore.Modules.Organization.Domain.Branches.Branch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("address");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character(3)")
+                        .HasColumnName("code")
+                        .IsFixedLength();
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("InstitutionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("institution_id");
+
+                    b.Property<DateTime?>("ModifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at_utc");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("modified_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid?>("ParentBranchId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_branch_id");
+
+                    b.Property<uint>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_branches");
+
+                    b.HasIndex("ParentBranchId")
+                        .HasDatabaseName("ix_branches_parent_branch_id");
+
+                    b.HasIndex("InstitutionId", "Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_branches_institution_id_code");
+
+                    b.ToTable("branches", "org");
+                });
+
+            modelBuilder.Entity("FinCore.Modules.Organization.Domain.Calendars.HolidayCalendar", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("institution_id");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime?>("ModifiedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at_utc");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("modified_by");
+
+                    b.Property<uint>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.Property<string>("WeekendDays")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("weekend_days");
+
+                    b.HasKey("Id")
+                        .HasName("pk_holiday_calendars");
+
+                    b.ToTable("holiday_calendars", "org");
                 });
 
             modelBuilder.Entity("FinCore.Modules.Organization.Domain.Currencies.SupportedCurrency", b =>
@@ -252,6 +371,71 @@ namespace FinCore.Modules.Organization.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_institutions_code");
 
                     b.ToTable("institutions", "org");
+                });
+
+            modelBuilder.Entity("FinCore.Modules.Organization.Domain.Branches.Branch", b =>
+                {
+                    b.HasOne("FinCore.Modules.Organization.Domain.Institutions.Institution", null)
+                        .WithMany()
+                        .HasForeignKey("InstitutionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_branches_institutions_institution_id");
+
+                    b.HasOne("FinCore.Modules.Organization.Domain.Branches.Branch", null)
+                        .WithMany()
+                        .HasForeignKey("ParentBranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_branches_branches_parent_branch_id");
+                });
+
+            modelBuilder.Entity("FinCore.Modules.Organization.Domain.Calendars.HolidayCalendar", b =>
+                {
+                    b.HasOne("FinCore.Modules.Organization.Domain.Institutions.Institution", null)
+                        .WithOne()
+                        .HasForeignKey("FinCore.Modules.Organization.Domain.Calendars.HolidayCalendar", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_holiday_calendars_institutions_institution_id");
+
+                    b.OwnsMany("FinCore.Modules.Organization.Domain.Calendars.Holiday", "Holidays", b1 =>
+                        {
+                            b1.Property<long>("id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("bigint")
+                                .HasColumnName("id");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<long>("id"));
+
+                            b1.Property<DateOnly>("Date")
+                                .HasColumnType("date")
+                                .HasColumnName("date");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("name");
+
+                            b1.Property<Guid>("institution_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("institution_id");
+
+                            b1.HasKey("id")
+                                .HasName("pk_holidays");
+
+                            b1.HasIndex("institution_id", "Date")
+                                .IsUnique()
+                                .HasDatabaseName("ix_holidays_institution_id_date");
+
+                            b1.ToTable("holidays", "org");
+
+                            b1.WithOwner()
+                                .HasForeignKey("institution_id")
+                                .HasConstraintName("fk_holidays_holiday_calendars_institution_id");
+                        });
+
+                    b.Navigation("Holidays");
                 });
 #pragma warning restore 612, 618
         }

@@ -8,6 +8,7 @@
     <PackageReference Include="EFCore.NamingConventions" />
     <PackageReference Include="Quartz.Extensions.Hosting" />
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" />
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
