@@ -8,7 +8,7 @@
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Company>FinCore</Company>
     <Product>FinCore</Product>
     <!-- CI passes the git SHA (dotnet build -p:SourceRevisionId=<sha>) so InformationalVersion becomes 0.1.0+<sha>. -->
